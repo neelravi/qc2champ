@@ -1,5 +1,5 @@
 packaging>=19.0
-numpy
+numpy>=1.12.0
 
 # cclib
 cclib>=1.7.1
