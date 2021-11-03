@@ -1,0 +1,22 @@
+packaging>=19.0
+numpy
+
+# cclib
+cclib>=1.7.1
+
+# methods
+scipy>=1.2.0
+periodictable
+
+# bridges
+biopython==1.76
+ase>=3.21 ; python_version >= '3.5'
+git+https://github.com/rpmuller/pyquante2.git ; python_version > '3.0'
+
+# For building the documentation
+sphinx
+
+# For testing
+pytest
+coverage
+pytest-cov

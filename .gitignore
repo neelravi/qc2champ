@@ -1,0 +1,12 @@
+__pycache__
+MANIFEST
+build
+dist
+htmlcov
+*.pyc
+.cache
+.coverage
+.pytest_cache
+qc2champ.egg-info
+venv
+
