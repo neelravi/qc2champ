@@ -22,6 +22,7 @@ Currently supported programs whose output files are parsed by cclib are:
 __version__ = "1.0.0"
 
 from qc2champ import io
+import cclib
 
 # The test module can be imported if it was installed with cclib.
 try:
@@ -32,5 +33,6 @@ except ImportError:
 # The objects below constitute our public API. These names will not change
 # over time. Names in the sub-modules will typically also be backwards
 # compatible, but may sometimes change when code is moved around.
-qcopen = io.qcopen
-qcwrite = io.qcwrite
+qcopen = cclib.io.ccopen
+qcopen = cclib.io.ccopen
+qcwrite = cclib.io.ccwrite

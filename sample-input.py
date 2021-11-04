@@ -11,7 +11,7 @@ for filename in [ "sample_acrolein_cas.out"]:
 
 
 
-    data = cclib.io.qcread(filename)
+    data = cclib.io.ccread(filename)
 
     print(dir(data))
     print(f"There are {data.natom} atoms and {data.nbasis} number of cartesian basis")
@@ -57,8 +57,8 @@ for filename in [ "sample_acrolein_cas.out"]:
 
 
 
-    qc2champ.io.write_champ_old_sym(data, outputdest="CN3_" + basename)
-    qc2champ.io.write_champ_old_geo(data, outputdest="CN3_" + basename)
-    qc2champ.io.write_champ_old_lcao(data, outputdest="CN3_" + basename)
-    qc2champ.io.write_champ_old_det(data, outputdest="CN3_" + basename)
+    # qc2champ.io.write_champ_v2_sym(data, outputdest="CN3_" + basename)
+    qc2champ.io.write_champ_v2_geometry(data, outputdest="CN3_" + basename)
+    # qc2champ.io.write_champ_v2_lcao(data, outputdest="CN3_" + basename)
+    # qc2champ.io.write_champ_v2_det(data, outputdest="CN3_" + basename)
 
