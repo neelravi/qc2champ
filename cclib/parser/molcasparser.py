@@ -1015,7 +1015,7 @@ class Molcas(logfileparser.Logfile):
 
                 line = next(inputfile)
 
-
+        #                               &RASSCF
         # ++    Wave function specifications:
         #       -----------------------------
         #
@@ -1086,9 +1086,9 @@ class Molcas(logfileparser.Logfile):
         #       Root passed to geometry opt.               3
         # --
 
+
         if '++    CI expansion specifications:' in line:
             self.ci = {}
-
             while line[:2] != '--':
                 if 'Number of CSFs' in line:
                     try:
@@ -1122,3 +1122,76 @@ class Molcas(logfileparser.Logfile):
                         self.ci["weights"] = []
 
                 line = next(inputfile)
+
+            self.set_attribute('ci', self.ci)
+            print ("ci from inside", self.ci)
+
+        #       ************************************************************************************************************************
+        #                                                       Wave function printout:
+        #                        occupation of active orbitals, and spin coupling of open shells (u,d: Spin up or down)
+        #       ************************************************************************************************************************
+        #
+        #       Note: transformation to natural orbitals
+        #       has been made, which may change the order of the CSFs.
+        #
+        #       printout of CI-coefficients larger than  0.00 for root  1
+        #       energy=    -188.396249
+        #       conf/sym  11111     Coeff  Weight
+        #              1  22200  -0.84226 0.70941
+        #
+        #    + sqrt(     1/1     )  |22200|
+        #
+        #              2  22ud0   0.41173 0.16952
+        #
+        #    + sqrt(     1/2     )  |22ab0|
+        #    - sqrt(     1/2     )  |22ba0|
+        #
+        #              3  22020   0.07400 0.00548
+
+        # print(self.ci["Number of root(s) required"])
+        # number_of_roots = int(self.ci["Number of root(s) required"])
+        # number_of_csfs = int(self.ci["Number of CSFs"])
+
+        # ci_energy = numpy.ndarray(shape=(number_of_roots), dtype=float)
+        # ci_coeff = numpy.ndarray(shape=(number_of_roots, number_of_csfs), dtype=float)
+        # ci_occupations = [[] for i in range(number_of_csfs)]
+        # print (ci_occupations.shape)
+        # if 'Wave function printout:' in line:
+
+        #     while line[6:53] != 'Natural orbitals and occupation numbers for root':
+        #         if 'printout of CI-coefficients larger than  0.00 for root' in line:
+        #             try:
+        #                 root_number = int(line.split()[8])
+        #                 print ("root number", root_number)
+        #             except:
+        #                 self.logger.warning('Root number label is missing!')
+        #         if 'energy=' in line:
+        #             try:
+        #                 ci_energy[root_number] = line.split()[1]
+        #             except:
+        #                 self.logger.warning('CI root energy label is missing!')
+        #                 ci_energy[root_number] = 0.0
+
+                # if 'Number of root(s) required' in line:
+                #     try:
+                #         self.ci["Number of root(s) required"] = line.split()[4]
+                #     except:
+                #         self.logger.warning('Number of root(s) required label is missing!')
+                #         self.ci["Number of root(s) required"]
+                # if 'CI roots used' in line:
+                #     try:
+                #         self.ci["CI roots used"] = line.split()[3:]
+                #     except:
+                #         self.logger.warning('CI roots used label is missing!')
+                #         self.ci["CI roots used"] = []
+                # if 'weights' in line:
+                #     try:
+                #         self.ci["weights"] = line.split()[1:]
+                #     except:
+                #         self.logger.warning('weights label is missing!')
+                #         self.ci["weights"] = []
+
+            #     line = next(inputfile)
+            # print ("ci_energy", ci_energy.shape)
+            # print ("ci_coeff", ci_coeff.shape)
+
