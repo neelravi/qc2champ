@@ -1150,7 +1150,6 @@ class Molcas(logfileparser.Logfile):
 
         if 'Wave function printout:' in line:
 
-            print("number of roots outside ", self.ci["Number of root(s) required"])
             number_of_roots = int(self.ci["Number of root(s) required"])
             number_of_csfs = int(self.ci["Number of CSFs"])
 
@@ -1178,24 +1177,29 @@ class Molcas(logfileparser.Logfile):
                         self.logger.warning('ci energy label is missing!')
                         ci_energy[root_number-1] = 0.0
 
-
                 if 'conf/sym' in line:
                     line = next(inputfile)
+                    print ("first char", line.split()[0])
+                    # while line.split()[0] != '50':
 
+                if len(line.split()) == 4:
                     icsf = int(line.split()[0])
                     csf_occupations[root_number-1,icsf-1]  = line.split()[1]
                     csf_coeff[root_number-1,icsf-1] = line.split()[2]
-                    print ("raw ",  line.split()[1], line.split()[2])
 
+                    print ("root number ", root_number)
                     print ("csf number ", icsf)
                     print ("csf occupation ", csf_occupations[root_number-1,icsf-1])
                     print ("csf coefficient ", csf_coeff[root_number-1,icsf-1])
                     line = next(inputfile)
 
                 if "sqrt" in line:
-                    print (line)
+                    print ("line as it is in sqrt", line, " and ", icsf)
+                    print (" coeff ", line.split()[0], line.split()[2], " occup ", line.split()[4])
+
                     # csf_coeff[root_number-1,icsf-1] = line.split()[1]
                     # print ("csf coefficient ", csf_coeff[root_number-1,icsf-1])
+
                     line = next(inputfile)
 
 
