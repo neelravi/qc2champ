@@ -21,6 +21,8 @@ for filename in [sys.argv[1]]:
     print(f"The wfn information {data.wfn_info}")
     print(f"The CI information {data.ci}")
 
+    # print(f"The molecular coefficients {data.mocoeffs}")
+    # print(f"The molecular coefficients {np.shape(data.mocoeffs)}")
 
     qc2champ.io.ccwrite(data, outputtype="xyz", outputdest="output.xyz")
     # qc2champ.io.write_champ_v2_sym(data, outputdest="CN3_" + basename)

@@ -1072,6 +1072,7 @@ class Molcas(logfileparser.Logfile):
                         self.wfn_info["state_symmetry"] = ""
 
                 line = next(inputfile)
+            self.set_attribute('wfn_info', self.wfn_info)
 
 
         # ++    CI expansion specifications:
@@ -1124,7 +1125,6 @@ class Molcas(logfileparser.Logfile):
                 line = next(inputfile)
 
             self.set_attribute('ci', self.ci)
-            print ("ci from inside", self.ci)
 
         #       ************************************************************************************************************************
         #                                                       Wave function printout:
@@ -1148,50 +1148,58 @@ class Molcas(logfileparser.Logfile):
         #
         #              3  22020   0.07400 0.00548
 
-        # print(self.ci["Number of root(s) required"])
-        # number_of_roots = int(self.ci["Number of root(s) required"])
-        # number_of_csfs = int(self.ci["Number of CSFs"])
+        if 'Wave function printout:' in line:
 
-        # ci_energy = numpy.ndarray(shape=(number_of_roots), dtype=float)
-        # ci_coeff = numpy.ndarray(shape=(number_of_roots, number_of_csfs), dtype=float)
-        # ci_occupations = [[] for i in range(number_of_csfs)]
-        # print (ci_occupations.shape)
-        # if 'Wave function printout:' in line:
+            print("number of roots outside ", self.ci["Number of root(s) required"])
+            number_of_roots = int(self.ci["Number of root(s) required"])
+            number_of_csfs = int(self.ci["Number of CSFs"])
 
-        #     while line[6:53] != 'Natural orbitals and occupation numbers for root':
-        #         if 'printout of CI-coefficients larger than  0.00 for root' in line:
-        #             try:
-        #                 root_number = int(line.split()[8])
-        #                 print ("root number", root_number)
-        #             except:
-        #                 self.logger.warning('Root number label is missing!')
-        #         if 'energy=' in line:
-        #             try:
-        #                 ci_energy[root_number] = line.split()[1]
-        #             except:
-        #                 self.logger.warning('CI root energy label is missing!')
-        #                 ci_energy[root_number] = 0.0
+            ci_energy = numpy.ndarray(shape=(number_of_roots), dtype=float)
+            csf_coeff = numpy.ndarray(shape=(number_of_roots, number_of_csfs), dtype=float)
+            csf_occupations = numpy.ndarray(shape=(number_of_roots, number_of_csfs), dtype=object)
+            ci_coeff_occupations = [[] for i in range(number_of_csfs)]
 
-                # if 'Number of root(s) required' in line:
-                #     try:
-                #         self.ci["Number of root(s) required"] = line.split()[4]
-                #     except:
-                #         self.logger.warning('Number of root(s) required label is missing!')
-                #         self.ci["Number of root(s) required"]
-                # if 'CI roots used' in line:
-                #     try:
-                #         self.ci["CI roots used"] = line.split()[3:]
-                #     except:
-                #         self.logger.warning('CI roots used label is missing!')
-                #         self.ci["CI roots used"] = []
-                # if 'weights' in line:
-                #     try:
-                #         self.ci["weights"] = line.split()[1:]
-                #     except:
-                #         self.logger.warning('weights label is missing!')
-                #         self.ci["weights"] = []
+            while line[6:54] != 'Natural orbitals and occupation numbers for root':
 
-            #     line = next(inputfile)
+                if 'printout of CI-coefficients larger than' in line:
+                    try:
+                        root_number = int(line.split()[8])
+                        print ("root number ", root_number )
+                    except:
+                        self.logger.warning('CI coefficient root label is missing!')
+                        root_number = 0
+
+                if 'energy=' in line:
+                    print (line)
+                    try:
+                        ci_energy[root_number-1] = line.split()[1]
+                        print ("ci energy ", ci_energy[root_number-1])
+                    except:
+                        self.logger.warning('ci energy label is missing!')
+                        ci_energy[root_number-1] = 0.0
+
+
+                if 'conf/sym' in line:
+                    line = next(inputfile)
+
+                    icsf = int(line.split()[0])
+                    csf_occupations[root_number-1,icsf-1]  = line.split()[1]
+                    csf_coeff[root_number-1,icsf-1] = line.split()[2]
+                    print ("raw ",  line.split()[1], line.split()[2])
+
+                    print ("csf number ", icsf)
+                    print ("csf occupation ", csf_occupations[root_number-1,icsf-1])
+                    print ("csf coefficient ", csf_coeff[root_number-1,icsf-1])
+                    line = next(inputfile)
+
+                if "sqrt" in line:
+                    print (line)
+                    # csf_coeff[root_number-1,icsf-1] = line.split()[1]
+                    # print ("csf coefficient ", csf_coeff[root_number-1,icsf-1])
+                    line = next(inputfile)
+
+
+                line = next(inputfile)
             # print ("ci_energy", ci_energy.shape)
             # print ("ci_coeff", ci_coeff.shape)
 
