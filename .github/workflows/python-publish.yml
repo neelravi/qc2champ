@@ -9,8 +9,8 @@
 name: Publish Python Package on pypi
 
 on:
-  release:
-    types: [published]
+  push:
+    branches: [ main ]
 
 jobs:
   deploy:
