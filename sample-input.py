@@ -30,3 +30,4 @@ for filename in [sys.argv[1]]:
     # qc2champ.io.write_champ_v2_lcao(data, outputdest="CN3_" + basename)
     # qc2champ.io.write_champ_v2_det(data, outputdest="CN3_" + basename)
 
+    # print("The CI Occupations",  data.ci['CI_Energy'])
