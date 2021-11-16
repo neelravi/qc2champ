@@ -1149,6 +1149,7 @@ class Molcas(logfileparser.Logfile):
         #              3  22020   0.07400 0.00548
 
         if 'Wave function printout:' in line:
+            from fractions import Fraction
 
             number_of_roots = int(self.ci["Number of root(s) required"])
             number_of_csfs = int(self.ci["Number of CSFs"])
@@ -1156,7 +1157,6 @@ class Molcas(logfileparser.Logfile):
             ci_energy = numpy.ndarray(shape=(number_of_roots), dtype=float)
             csf_coeff = numpy.ndarray(shape=(number_of_roots, number_of_csfs), dtype=float)
             csf_occupations = numpy.ndarray(shape=(number_of_roots, number_of_csfs), dtype=object)
-            # ci_occupations = numpy.array([],dtype=object)
             ci_occupations = [numpy.array([],dtype=object) for i in range(number_of_roots)]
             ci_coeff       = [numpy.array([],dtype=object) for i in range(number_of_roots)]
 
@@ -1190,7 +1190,15 @@ class Molcas(logfileparser.Logfile):
 
                 if "sqrt" in line:
                     ci_occupations[root_number-1] = numpy.append( ci_occupations[root_number-1], line.split()[4])
-                    ci_coeff[root_number-1]       = numpy.append( ci_coeff[root_number-1], line.split()[2])
+                    # Read the phase factor + or -
+                    if line.split()[0] == "-":
+                        coeff = -numpy.sqrt(float(Fraction(line.split()[2])))
+                    else:
+                        coeff = numpy.sqrt(float(Fraction(line.split()[2])))
+
+                    ci_coeff[root_number-1]       = numpy.append( ci_coeff[root_number-1], coeff)
+
 
                 line = next(inputfile)
 
+            # print (ci_coeff)
