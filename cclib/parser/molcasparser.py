@@ -1156,7 +1156,9 @@ class Molcas(logfileparser.Logfile):
             ci_energy = numpy.ndarray(shape=(number_of_roots), dtype=float)
             csf_coeff = numpy.ndarray(shape=(number_of_roots, number_of_csfs), dtype=float)
             csf_occupations = numpy.ndarray(shape=(number_of_roots, number_of_csfs), dtype=object)
-            ci_coeff_occupations = [[] for i in range(number_of_csfs)]
+            # ci_occupations = numpy.array([],dtype=object)
+            ci_occupations = [numpy.array([],dtype=object) for i in range(number_of_roots)]
+            ci_coeff       = [numpy.array([],dtype=object) for i in range(number_of_roots)]
 
             while line[6:54] != 'Natural orbitals and occupation numbers for root':
 
@@ -1179,31 +1181,16 @@ class Molcas(logfileparser.Logfile):
 
                 if 'conf/sym' in line:
                     line = next(inputfile)
-                    print ("first char", line.split()[0])
-                    # while line.split()[0] != '50':
 
                 if len(line.split()) == 4:
                     icsf = int(line.split()[0])
                     csf_occupations[root_number-1,icsf-1]  = line.split()[1]
                     csf_coeff[root_number-1,icsf-1] = line.split()[2]
-
-                    print ("root number ", root_number)
-                    print ("csf number ", icsf)
-                    print ("csf occupation ", csf_occupations[root_number-1,icsf-1])
-                    print ("csf coefficient ", csf_coeff[root_number-1,icsf-1])
                     line = next(inputfile)
 
                 if "sqrt" in line:
-                    print ("line as it is in sqrt", line, " and ", icsf)
-                    print (" coeff ", line.split()[0], line.split()[2], " occup ", line.split()[4])
-
-                    # csf_coeff[root_number-1,icsf-1] = line.split()[1]
-                    # print ("csf coefficient ", csf_coeff[root_number-1,icsf-1])
-
-                    line = next(inputfile)
-
+                    ci_occupations[root_number-1] = numpy.append( ci_occupations[root_number-1], line.split()[4])
+                    ci_coeff[root_number-1]       = numpy.append( ci_coeff[root_number-1], line.split()[2])
 
                 line = next(inputfile)
-            # print ("ci_energy", ci_energy.shape)
-            # print ("ci_coeff", ci_coeff.shape)
 
