@@ -145,18 +145,22 @@ class Molcas(logfileparser.Logfile):
                 self.set_attribute('natom', len(self.atomnos))
 
         ## This section is present when executing &SCF.
-        #  ++    Orbital specifications:
-        #  -----------------------
+        # ++    Orbital specifications:
+        #       -----------------------
 
-        #  Symmetry species               1
+        #       Symmetry species                           1   2   3   4
+        #                                                 a1  b1  a2  b2
+        #       Frozen orbitals                            0   0   0   0
+        #       Inactive orbitals                          6   5   0   0
+        #       Active orbitals                            0   0   4   6
+        #       Secondary orbitals                        45  39  10  12
+        #       Deleted orbitals                           0   0   0   0
+        #       Number of basis functions                 51  44  14  18
+        # --
 
-        #  Frozen orbitals                0
-        #  Occupied orbitals              3
-        #  Secondary orbitals            77
-        #  Deleted orbitals               0
-        #  Total number of orbitals      80
-        #  Number of basis functions     80
-        #  --
+        if not hasattr(self, 'symm_info'):
+            self.symm_info = {}
+
         if line[:29] == '++    Orbital specifications:':
 
             self.skip_lines(inputfile, ['dashes', 'blank'])
@@ -166,14 +170,48 @@ class Molcas(logfileparser.Logfile):
             while not line.startswith('--'):
                 if line.strip().startswith('Symmetry species'):
                     symmetry_count = int(line.split()[-1])
+                    self.symm_info["symmetry_count"] = symmetry_count
+                    line = next(inputfile)
+                    irreps = []
+                    for i in range(symmetry_count):
+                        irreps.append(line.split()[i])
+                    self.symm_info["irreps"] = irreps
+
+                if line.strip().startswith('Frozen orbitals'):
+                    frozen_orbitals = []
+                    for i in range(2,symmetry_count+2):
+                        frozen_orbitals.append(line.split()[i])
+                    self.symm_info["frozen_orbitals"] = frozen_orbitals
+
+                if line.strip().startswith('Inactive orbitals'):
+                    inactive_orbitals = []
+                    for i in range(2,symmetry_count+2):
+                        inactive_orbitals.append(line.split()[i])
+                    self.symm_info["inactive_orbitals"] = inactive_orbitals
+
+                if line.strip().startswith('Active orbitals'):
+                    active_orbitals = []
+                    for i in range(2,symmetry_count+2):
+                        active_orbitals.append(line.split()[i])
+                    self.symm_info["active_orbitals"] = active_orbitals
+
                 if line.strip().startswith('Total number of orbitals'):
                     nmos = line.split()[-symmetry_count:]
                     self.set_attribute('nmo', sum(map(int, nmos)))
+                    orbitals_per_irrep = []
+                    for i in range(4,symmetry_count+4):
+                        orbitals_per_irrep.append(line.split()[i])
+                    self.symm_info["orbitals_per_irrep"] = orbitals_per_irrep
+
                 if line.strip().startswith('Number of basis functions'):
                     nbasis = line.split()[-symmetry_count:]
                     self.set_attribute('nbasis', sum(map(int, nbasis)))
-
+                    basis_per_irrep = []
+                    for i in range(4,symmetry_count+4):
+                        basis_per_irrep.append(line.split()[i])
+                    self.symm_info["basis_per_irrep"] = basis_per_irrep
                 line = next(inputfile)
+            self.set_attribute('symm_info', self.symm_info)
 
         if line.strip().startswith(('Molecular charge', 'Total molecular charge')):
             self.set_attribute('charge', int(float(line.split()[-1])))

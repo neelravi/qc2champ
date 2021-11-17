@@ -22,6 +22,8 @@ for filename in [sys.argv[1]]:
     print(f"The CI information {data.ci}")
 
     # print(f"The molecular coefficients {data.mocoeffs}")
+    # print(f"The molecular symmetry {data.mosyms}")
+    print(f"The molecular symmetry {data.symm_info}")
     # print(f"The molecular coefficients {np.shape(data.mocoeffs)}")
 
     qc2champ.io.ccwrite(data, outputtype="xyz", outputdest="output.xyz")

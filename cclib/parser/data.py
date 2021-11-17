@@ -83,6 +83,7 @@ class ccData:
         scfenergies -- molecular electronic energies after SCF (Hartree-Fock, DFT) (array[1], eV)
         scftargets -- targets for convergence of the SCF (array[2])
         scfvalues -- current values for convergence of the SCF (list of arrays[2])
+        symm_info -- symmetry information per irrep (dict)
         temperature -- temperature used for Thermochemistry (float, kelvin)
         time -- time in molecular dynamics and other trajectories (array[1], fs)
         transprop -- all absorption and emission spectra (dictionary {name:(etenergies, etoscs)})
@@ -167,6 +168,7 @@ class ccData:
        "scfenergies":      Attribute(numpy.ndarray,    'scf energies',                'optimization:scf'),
        "scftargets":       Attribute(numpy.ndarray,    'targets',                     'optimization:scf'),
        "scfvalues":        Attribute(list,             'values',                      'optimization:scf'),
+       "symm_info":        Attribute(dict,             'symmetry',                    'optimization:scf'),
        "temperature":      Attribute(float,            'temperature',                 'properties'),
        "time":             Attribute(numpy.ndarray,    'time',                        'N/A'),
        "transprop":        Attribute(dict,             'electronic transitions',      'transitions'),
