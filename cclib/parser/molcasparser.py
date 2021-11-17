@@ -826,6 +826,9 @@ class Molcas(logfileparser.Logfile):
             if 'Natural orbitals' not in line and "Pseudonatural" not in line:
                 self.skip_line(inputfile, 'b')
 
+            if 'Quasi-canonical orbitals' not in line and 'Output orbitals from CASPT2' not in line:
+                self.skip_line(inputfile, 'b')
+
                 # Symmetry is not currently supported, so this line can have one form.
                 # while 'Molecular orbitals for symmetry species 1: a' not in line.strip():
                 #     line = next(inputfile)
@@ -842,49 +845,45 @@ class Molcas(logfileparser.Logfile):
                 aonames_per_irrep = [[] for i in range(num_irrep)]
                 orbital_index_per_irrep = [[] for i in range(num_irrep)]
 
-                while line[:2] != '--':
-                    for irrep in range(num_irrep):
-                        line = next(inputfile)
+                for irrep in range(num_irrep):
+                    if line[:2] == '--':
+                        return
+                    line = next(inputfile)
+                    line = next(inputfile)
+                    tokens = line.split()
+                    while tokens and tokens[0] != '--':
+                        if line.strip().startswith('Orbital'):
+                            orbital_index_per_irrep[irrep] = line.split()[1:]
+                            for i in orbital_index_per_irrep[irrep]:
+                                mocoeffs_per_irrep[irrep].append([])
+                            line = next(inputfile)
+
+                        if line.strip().startswith('Energy'):
+                            energies = [utils.convertor(float(x), 'hartree', 'eV') for x in line.split()[1:]]
+                            moenergies_per_irrep[irrep].extend(energies)
+                            line = next(inputfile)
+
+                        if 'Occ. No.' in line:
+                            for i in line.split()[2:]:
+                                if float(i) != 0:
+                                    homos += 1
+                            self.skip_line(inputfile, 'b')
+                            line = next(inputfile)
+
+                        tokens = line.split()
+                        aonames_per_irrep[irrep].append("{atom}_{orbital}".format(atom=tokens[1], orbital=tokens[2]))
+
+                        info = tokens[3:]
+                        j = 0
+                        for i in orbital_index_per_irrep[irrep]:
+                            mocoeffs_per_irrep[irrep][int(i)-1].append(float(info[j]))
+                            j += 1
                         line = next(inputfile)
                         tokens = line.split()
-                        # print (tokens)
-                        while tokens and tokens[0] != '--':
-                            if line.strip().startswith('Orbital'):
-                                orbital_index_per_irrep[irrep] = line.split()[1:]
-                                for i in orbital_index_per_irrep[irrep]:
-                                    mocoeffs_per_irrep[irrep].append([])
-                                line = next(inputfile)
+                    # print ("mocoeffs per irrep ", irrep,  mocoeffs_per_irrep[irrep])
+                        # self.set_attribute('aonames', aonames)
 
-                            if line.strip().startswith('Energy'):
-                                energies = [utils.convertor(float(x), 'hartree', 'eV') for x in line.split()[1:]]
-                                moenergies_per_irrep[irrep].extend(energies)
-                                line = next(inputfile)
-
-                            if 'Occ. No.' in line:
-                                for i in line.split()[2:]:
-                                    if float(i) != 0:
-                                        homos += 1
-                                self.skip_line(inputfile, 'b')
-                                line = next(inputfile)
-
-                            tokens = line.split()
-                            # print ("tokens ", line[:2] != '--', tokens)
-                            if tokens[0] == '------------------':
-                                return
-                            aonames_per_irrep[irrep].append("{atom}_{orbital}".format(atom=tokens[1], orbital=tokens[2]))
-
-                            info = tokens[3:]
-                            # print ("info ", info)
-                            j = 0
-                            for i in orbital_index_per_irrep[irrep]:
-                                mocoeffs_per_irrep[irrep][int(i)-1].append(float(info[j]))
-                                j += 1
-                            line = next(inputfile)
-                            tokens = line.split()
-                        print ("mocoeffs per irrep ", irrep,  mocoeffs_per_irrep[irrep])
-                            # self.set_attribute('aonames', aonames)
-
-                    line=next(inputfile)
+                line=next(inputfile)
 
                         # if len(moenergies_per_irrep[irrep]) != self.symm_info["orbitals_per_irrep"][irrep]:
                         #     moenergies_per_irrep[irrep].extend([numpy.nan for x in range(self.symm_info["orbitals_per_irrep"][irrep] - len(moenergies_per_irrep[irrep]))])
@@ -900,7 +899,7 @@ class Molcas(logfileparser.Logfile):
                         #     mocoeffs_per_irrep[irrep].append(nan_array)
 
                         # self.append_attribute('mocoeffs', mocoeffs)
-                    print ("aonames ", aonames_per_irrep)
+                print ("aonames ", aonames_per_irrep)
 
 
 
