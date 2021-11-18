@@ -823,19 +823,8 @@ class Molcas(logfileparser.Logfile):
             line = next(inputfile)
 
             # We don't currently support parsing natural orbitals or active space orbitals.
-            if 'Natural orbitals' not in line and "Pseudonatural" not in line:
+            if 'Natural orbitals' not in line and "Pseudonatural" not in line and 'Quasi-canonical orbitals' not in line:
                 self.skip_line(inputfile, 'b')
-
-            if 'Quasi-canonical orbitals' not in line and 'Output orbitals from CASPT2' not in line:
-                self.skip_line(inputfile, 'b')
-
-                # Symmetry is not currently supported, so this line can have one form.
-                # while 'Molecular orbitals for symmetry species 1: a' not in line.strip():
-                #     line = next(inputfile)
-
-                # Symmetry is not currently supported, so this line can have one form.
-                # if line.strip() != 'Molecular orbitals for symmetry species 1: a':
-                #     return
 
 
                 homos = 0
@@ -899,7 +888,27 @@ class Molcas(logfileparser.Logfile):
                         #     mocoeffs_per_irrep[irrep].append(nan_array)
 
                         # self.append_attribute('mocoeffs', mocoeffs)
-                print ("aonames ", aonames_per_irrep)
+                # print ("aonames ", aonames_per_irrep)         # uncomment later
+
+
+        if '++    SO/AO info:' in line:
+
+            self.skip_lines(inputfile, ['d', 'b','s'])
+            line = next(inputfile)
+
+            num_irrep = 8 #self.symm_info["symmetry_count"]
+
+            self.skip_lines(inputfile, ['d', 'b', 's'])
+            line = next(inputfile)
+            for irrep in range(num_irrep):
+                tokens = line.split()
+                while tokens and tokens[0] != '--':
+                    tokens = line.split()
+                    print ("tokens inside ", tokens )
+                    line = next(inputfile)
+
+
+            line=next(inputfile)
 
 
 
