@@ -168,7 +168,7 @@ class ccData:
        "scfenergies":      Attribute(numpy.ndarray,    'scf energies',                'optimization:scf'),
        "scftargets":       Attribute(numpy.ndarray,    'targets',                     'optimization:scf'),
        "scfvalues":        Attribute(list,             'values',                      'optimization:scf'),
-       "symm_info":        Attribute(dict,             'symmetry',                    'optimization:scf'),
+       "symm_info":        Attribute(dict,             'symmetry',                    'properties'),
        "temperature":      Attribute(float,            'temperature',                 'properties'),
        "time":             Attribute(numpy.ndarray,    'time',                        'N/A'),
        "transprop":        Attribute(dict,             'electronic transitions',      'transitions'),

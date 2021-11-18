@@ -9,7 +9,7 @@
 
 import re
 import string
-
+import math
 import numpy
 from numpy.core.defchararray import center
 
@@ -950,6 +950,26 @@ class Molcas(logfileparser.Logfile):
             equiv_center.append(sublist)
             print ("equivalent list ", equiv_center)
 
+            # Finding and counting types of basis functions
+            import collections
+            types_of_basis_functions = collections.Counter([item[1:2] for item in symm_adapted_basis["type"]])
+            print ("types of basis functions", types_of_basis_functions)
+
+            testorb=[]
+
+            num_irrep =  len(list_irrep)
+            # print ("where required ", hasattr(self, 'symm_info'))
+            # print ("num irrep ", num_irrep, self.symm_info["symmetry_count"])
+            # print (self.symm_info["basis_per_irrep"])
+
+            # for t in range(int(math.ceil(bas[i]/4.0))):
+                # print ("t ", t)
+            #     extlist=[ float(line2.split()[0][n:n+18]) for n in range(0,len(line2.split()[0]),18)]
+            #     testorb.extend(extlist)
+            #     line2=inporbf.readline()
+            # lc1=0
+            # lc2=0
+            # tabline_new=[]
 
 
 
