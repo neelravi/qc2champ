@@ -831,7 +831,7 @@ class Molcas(logfileparser.Logfile):
                 num_irrep =  self.symm_info["symmetry_count"]
                 mocoeffs_per_irrep = [[] for i in range(num_irrep)]
                 moenergies_per_irrep = [[] for i in range(num_irrep)]
-                aonames_per_irrep = [[] for i in range(num_irrep)]
+                # aonames_per_irrep = [[] for i in range(num_irrep)]
                 orbital_index_per_irrep = [[] for i in range(num_irrep)]
 
                 for irrep in range(num_irrep):
@@ -860,7 +860,7 @@ class Molcas(logfileparser.Logfile):
                             line = next(inputfile)
 
                         tokens = line.split()
-                        aonames_per_irrep[irrep].append("{atom}_{orbital}".format(atom=tokens[1], orbital=tokens[2]))
+                        # aonames_per_irrep[irrep].append("{atom}_{orbital}".format(atom=tokens[1], orbital=tokens[2]))
 
                         info = tokens[3:]
                         j = 0
@@ -896,7 +896,10 @@ class Molcas(logfileparser.Logfile):
             self.skip_lines(inputfile, ['d', 'b','s'])
             line = next(inputfile)
 
-            num_irrep = 8 #self.symm_info["symmetry_count"]
+            num_irrep = 8  # self.symm_info["symmetry_count"]
+            symm_adapted_basis = {}
+            list_irrep = []
+            basis_function_irrep = []
 
             self.skip_lines(inputfile, ['d', 'b', 's'])
             line = next(inputfile)
@@ -904,12 +907,35 @@ class Molcas(logfileparser.Logfile):
                 tokens = line.split()
                 while tokens and tokens[0] != '--':
                     tokens = line.split()
-                    print ("tokens inside ", tokens )
+
+                    if line.strip().startswith('Irreducible representation'):
+                        tokens = line.split()
+                        list_irrep.append(tokens[3])
+                        line = next(inputfile)
+
+                    if line.strip().startswith('Basis function(s) of irrep'):
+                        tokens = line.split()
+                        basis_function_irrep.append(tokens[4:])
+                        line = next(inputfile)
+
+                    if line.strip().startswith('Basis Label'):
+                        line = next(inputfile)
+
+                    tokens = line.split()
+                    if len(tokens) != 0 and tokens[0] != '--':
+                        symm_adapted_basis.setdefault("iter", []).append(tokens[0])
+                        symm_adapted_basis.setdefault("atom", []).append(tokens[1])
+                        symm_adapted_basis.setdefault("type", []).append(tokens[2])
+                        symm_adapted_basis.setdefault("center", []).append([tokens[i] for i in range(3, len(tokens), 2)])
+                        symm_adapted_basis.setdefault("phase", []).append([tokens[i] for i in range(4, len(tokens), 2)])
+                        # symm_adapted_basis.append("{atom}_{orbital}".format(atom=tokens[1], orbital=tokens[2]))
                     line = next(inputfile)
 
 
             line=next(inputfile)
-
+            print ("irreps ", list_irrep)
+            print ("basis_function_irrep ", basis_function_irrep)
+            print ("aonames ", symm_adapted_basis)         # uncomment later
 
 
         ## Parsing MP energy from the &MBPT2 module.
