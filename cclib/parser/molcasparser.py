@@ -11,6 +11,7 @@ import re
 import string
 
 import numpy
+from numpy.core.defchararray import center
 
 from cclib.parser import logfileparser
 from cclib.parser import utils
@@ -935,7 +936,21 @@ class Molcas(logfileparser.Logfile):
             line=next(inputfile)
             print ("irreps ", list_irrep)
             print ("basis_function_irrep ", basis_function_irrep)
-            print ("aonames ", symm_adapted_basis)         # uncomment later
+            print ("symmetry adapted basis data ", symm_adapted_basis)         # uncomment later
+            print ("equivalent centers")
+            # Finding the equivalent centers needed for mo coefficient reconstruction
+            equiv_center = []; sublist = []
+            for l in symm_adapted_basis["center"]:
+                # if atom is not equivalent (only one pair of center-phase)
+                if len(l) == 1:
+                    [equiv_center.append(l[0]) if l[0] not in equiv_center else None]
+                else:
+                    # if atom is equivalent (multiple pairs of center-phase)
+                    [sublist.append(l) if l not in sublist else None]
+            equiv_center.append(sublist)
+            print ("equivalent list ", equiv_center)
+
+
 
 
         ## Parsing MP energy from the &MBPT2 module.
