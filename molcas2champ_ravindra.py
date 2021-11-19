@@ -79,7 +79,7 @@ def symmspec(inputf):
   print "Number of symmetry species:", nsymmspec
   print "Number of symmetry species with active orbitals:", nactsymspec
   print "Number of deleted orbitals:",ndeleted
-  return nsymmspec, nactsymspec, ndeleted, symdel;
+  return nsymmspec, nactsymspec, ndeleted, symdel
 
 #Set 1: Call functions
 #run= run_type(inputf)
@@ -619,35 +619,50 @@ def active_orb(inputf):
   orbtype=[]
   comb_list=list()
   if (run=='SCF'):
-   for i in range(nsymmspec):
-     while ((len(line.split())<4) or ((line.split()[0]+line.split()[1]+line.split()[2])!='Molecularorbitalsfor')):
-       line=inputf.readline();l=l+1
-     for k in range(bas[i]-symdel[i]):
-       orbtype.append(i+1)
-     line=inputf.readline()
-     line=inputf.readline()
-     for s in range(int(math.ceil((bas[i]-symdel[i])/10.0))):
-      for k in range(1,len(line.split())):
-        orbital.append(int(line.split()[k]))
-      line=inputf.readline()
-      for k in range(1,len(line.split())):
-        energy.append(float(line.split()[k]))
-      line=inputf.readline()
-      for k in range(2,len(line.split())):
-        occup_no.append(float(line.split()[k]))
-      for n in range(bas[i]+3):
-        line=inputf.readline();l=l+1
-   if ((len(orbital)!=nbas-ndeleted) or (len(energy)!=nbas-ndeleted) or (len(occup_no)!=nbas-ndeleted)):
-      print "Something is wrong in the loop!"
-      sys.exit()
-   else:
-      for i in range(nbas-ndeleted):
-        comb_list.append([(orbtype[i],orbital[i]),energy[i],occup_no[i]])
-   comb_list=sorted(comb_list,key=lambda x : (x[1],-x[2]))
-   occup_list=[]
-   for i in range(len(comb_list)):
-     if (comb_list[i][2]>0.0):
-       occup_list.append(comb_list[i])
+    for line in inputf:
+        if line.strip().startswith("Title: SCF orbitals"):
+            while not line.startswith('--'):
+            # At this line Orbital index are listed like "Orbital            1         2         3         4         5         6         7         8         9        10"
+              tokens = line.split()
+              print ("tokens ", tokens )
+              if line.strip().startswith('Orbital'):
+                print ("tokens inside", tokens )
+                orbital.extend(tokens[1:])
+                line = next(inputf)
+
+                if line.strip().startswith('Energy'):
+                  energy.extend(tokens[1:])
+                  line = next(inputf)
+
+                if 'Occ. No.' in line:
+                  occup_no.extend(tokens[1:])
+                  line = next(inputf)
+              line = next(inputf)
+    print ("final orbital list ", orbital)
+      # print ("symdel[i]", symdel[i], bas[i])
+      # for s in range(3):#  int(math.ceil((bas[i]-symdel[i])/10.0))):
+      #   print ("length ", len(line.split()), line.split())
+      #   for k in range(1,len(line.split())):
+      #     orbital.append(int(line.split()[k]))
+      #   line=inputf.readline()
+      #   for k in range(1,len(line.split())):
+      #     energy.append(float(line.split()[k]))
+      #   line=inputf.readline()
+      #   for k in range(2,len(line.split())):
+      #     occup_no.append(float(line.split()[k]))
+      #   for n in range(bas[i]+3):
+      #     line=inputf.readline();l=l+1
+    # if ((len(orbital)!=nbas-ndeleted) or (len(energy)!=nbas-ndeleted) or (len(occup_no)!=nbas-ndeleted)):
+    #     print "Something is wrong in the loop!"
+    #     sys.exit()
+      # else:
+      #   for i in range(nbas-ndeleted):
+      #     comb_list.append([(orbtype[i],orbital[i]),energy[i],occup_no[i]])
+    # comb_list=sorted(comb_list,key=lambda x : (x[1],-x[2]))
+    # occup_list=[]
+    # for i in range(len(comb_list)):
+    #   if (comb_list[i][2]>0.0):
+    #     occup_list.append(comb_list[i])
   else:
     while((len(line.split())<2) or (line.split()[0]+line.split()[1])!='Pseudonaturalactive'):
       line=inputf.readline();l=l+1
