@@ -12,6 +12,7 @@ import string
 import math
 import numpy
 from numpy.core.defchararray import center
+from collections import Counter, OrderedDict
 
 from cclib.parser import logfileparser
 from cclib.parser import utils
@@ -145,74 +146,76 @@ class Molcas(logfileparser.Logfile):
             if not hasattr(self, 'natom'):
                 self.set_attribute('natom', len(self.atomnos))
 
-        ## This section is present when executing &SCF.
-        # ++    Orbital specifications:
-        #       -----------------------
+        # ## This section is present when executing &SCF.
+        # # ++    Orbital specifications:
+        # #       -----------------------
 
-        #       Symmetry species                           1   2   3   4
-        #                                                 a1  b1  a2  b2
-        #       Frozen orbitals                            0   0   0   0
-        #       Inactive orbitals                          6   5   0   0
-        #       Active orbitals                            0   0   4   6
-        #       Secondary orbitals                        45  39  10  12
-        #       Deleted orbitals                           0   0   0   0
-        #       Number of basis functions                 51  44  14  18
-        # --
+        # #       Symmetry species                           1   2   3   4
+        # #                                                 a1  b1  a2  b2
+        # #       Frozen orbitals                            0   0   0   0
+        # #       Inactive orbitals                          6   5   0   0
+        # #       Active orbitals                            0   0   4   6
+        # #       Secondary orbitals                        45  39  10  12
+        # #       Deleted orbitals                           0   0   0   0
+        # #       Number of basis functions                 51  44  14  18
+        # # --
 
-        if not hasattr(self, 'symm_info'):
-            self.symm_info = {}
+        # if not hasattr(self, 'symm_info'):
+        #     self.symm_info = {}
 
-        if line[:29] == '++    Orbital specifications:':
+        # if line[:29] == '++    Orbital specifications:':
 
-            self.skip_lines(inputfile, ['dashes', 'blank'])
-            line = next(inputfile)
+        #     self.skip_lines(inputfile, ['dashes', 'blank'])
+        #     line = next(inputfile)
 
-            symmetry_count = 1
-            while not line.startswith('--'):
-                if line.strip().startswith('Symmetry species'):
-                    symmetry_count = int(line.split()[-1])
-                    self.symm_info["symmetry_count"] = int(symmetry_count)
-                    line = next(inputfile)
-                    irreps = []
-                    for i in range(symmetry_count):
-                        irreps.append(line.split()[i])
-                    self.symm_info["irreps"] = irreps
+        #     symmetry_count = 1
+        #     while not line.startswith('--'):
+        #         if line.strip().startswith('Symmetry species'):
+        #             symmetry_count = int(line.split()[-1])
+        #             self.symm_info["symmetry_count"] = int(symmetry_count)
+        #             line = next(inputfile)
+        #             irreps = []
+        #             for i in range(symmetry_count):
+        #                 irreps.append(line.split()[i])
+        #             self.symm_info["irreps"] = irreps
 
-                if line.strip().startswith('Frozen orbitals'):
-                    frozen_orbitals = []
-                    for i in range(2,symmetry_count+2):
-                        frozen_orbitals.append(line.split()[i])
-                    self.symm_info["frozen_orbitals"] = list(map(int, frozen_orbitals))
+        #         if line.strip().startswith('Frozen orbitals'):
+        #             frozen_orbitals = []
+        #             for i in range(2,symmetry_count+2):
+        #                 frozen_orbitals.append(line.split()[i])
+        #             self.symm_info["frozen_orbitals"] = list(map(int, frozen_orbitals))
 
-                if line.strip().startswith('Inactive orbitals'):
-                    inactive_orbitals = []
-                    for i in range(2,symmetry_count+2):
-                        inactive_orbitals.append(line.split()[i])
-                    self.symm_info["inactive_orbitals"] = list(map(int, inactive_orbitals))
+        #         if line.strip().startswith('Inactive orbitals'):
+        #             inactive_orbitals = []
+        #             for i in range(2,symmetry_count+2):
+        #                 inactive_orbitals.append(line.split()[i])
+        #             self.symm_info["inactive_orbitals"] = list(map(int, inactive_orbitals))
 
-                if line.strip().startswith('Active orbitals'):
-                    active_orbitals = []
-                    for i in range(2,symmetry_count+2):
-                        active_orbitals.append(line.split()[i])
-                    self.symm_info["active_orbitals"] = list(map(int, active_orbitals))
+        #         if line.strip().startswith('Active orbitals'):
+        #             active_orbitals = []
+        #             for i in range(2,symmetry_count+2):
+        #                 active_orbitals.append(line.split()[i])
+        #             self.symm_info["active_orbitals"] = list(map(int, active_orbitals))
 
-                if line.strip().startswith('Total number of orbitals'):
-                    nmos = line.split()[-symmetry_count:]
-                    self.set_attribute('nmo', sum(map(int, nmos)))
-                    orbitals_per_irrep = []
-                    for i in range(4,symmetry_count+4):
-                        orbitals_per_irrep.append(line.split()[i])
-                    self.symm_info["orbitals_per_irrep"] = list(map(int, orbitals_per_irrep))
+        #         if line.strip().startswith('Total number of orbitals'):
+        #             nmos = line.split()[-symmetry_count:]
+        #             self.set_attribute('nmo', sum(map(int, nmos)))
+        #             orbitals_per_irrep = []
+        #             for i in range(4,symmetry_count+4):
+        #                 orbitals_per_irrep.append(line.split()[i])
+        #             self.symm_info["orbitals_per_irrep"] = list(map(int, orbitals_per_irrep))
 
-                if line.strip().startswith('Number of basis functions'):
-                    nbasis = line.split()[-symmetry_count:]
-                    self.set_attribute('nbasis', sum(map(int, nbasis)))
-                    basis_per_irrep = []
-                    for i in range(4,symmetry_count+4):
-                        basis_per_irrep.append(line.split()[i])
-                    self.symm_info["basis_per_irrep"] = list(map(int, basis_per_irrep))
-                line = next(inputfile)
-            self.set_attribute('symm_info', self.symm_info)
+        #         if line.strip().startswith('Number of basis functions'):
+        #             nbasis = line.split()[-symmetry_count:]
+        #             self.set_attribute('nbasis', sum(map(int, nbasis)))
+        #             basis_per_irrep = []
+        #             for i in range(4,symmetry_count+4):
+        #                 basis_per_irrep.append(line.split()[i])
+        #             self.symm_info["basis_per_irrep"] = list(map(int, basis_per_irrep))
+        #         line = next(inputfile)
+        #     self.set_attribute('symm_info', self.symm_info)
+
+        # print ("after symm info block ", self.symm_info)
 
         if line.strip().startswith(('Molecular charge', 'Total molecular charge')):
             self.set_attribute('charge', int(float(line.split()[-1])))
@@ -796,6 +799,75 @@ class Molcas(logfileparser.Logfile):
 
             self.grads[-1] = grads
 
+        ## This section is present when executing &SCF.
+        # ++    Orbital specifications:
+        #       -----------------------
+
+        #       Symmetry species                           1   2   3   4
+        #                                                 a1  b1  a2  b2
+        #       Frozen orbitals                            0   0   0   0
+        #       Inactive orbitals                          6   5   0   0
+        #       Active orbitals                            0   0   4   6
+        #       Secondary orbitals                        45  39  10  12
+        #       Deleted orbitals                           0   0   0   0
+        #       Number of basis functions                 51  44  14  18
+        # --
+
+        if not hasattr(self, 'symm_info'):
+            self.symm_info = {}
+
+        if line[:29] == '++    Orbital specifications:':
+
+            self.skip_lines(inputfile, ['dashes', 'blank'])
+            line = next(inputfile)
+
+            symmetry_count = 1
+            while not line.startswith('--'):
+                if line.strip().startswith('Symmetry species'):
+                    symmetry_count = int(line.split()[-1])
+                    self.symm_info["symmetry_count"] = int(symmetry_count)
+                    line = next(inputfile)
+                    irreps = []
+                    for i in range(symmetry_count):
+                        irreps.append(line.split()[i])
+                    self.symm_info["irreps"] = irreps
+
+                if line.strip().startswith('Frozen orbitals'):
+                    frozen_orbitals = []
+                    for i in range(2,symmetry_count+2):
+                        frozen_orbitals.append(line.split()[i])
+                    self.symm_info["frozen_orbitals"] = list(map(int, frozen_orbitals))
+
+                if line.strip().startswith('Inactive orbitals'):
+                    inactive_orbitals = []
+                    for i in range(2,symmetry_count+2):
+                        inactive_orbitals.append(line.split()[i])
+                    self.symm_info["inactive_orbitals"] = list(map(int, inactive_orbitals))
+
+                if line.strip().startswith('Active orbitals'):
+                    active_orbitals = []
+                    for i in range(2,symmetry_count+2):
+                        active_orbitals.append(line.split()[i])
+                    self.symm_info["active_orbitals"] = list(map(int, active_orbitals))
+
+                if line.strip().startswith('Total number of orbitals'):
+                    nmos = line.split()[-symmetry_count:]
+                    self.set_attribute('nmo', sum(map(int, nmos)))
+                    orbitals_per_irrep = []
+                    for i in range(4,symmetry_count+4):
+                        orbitals_per_irrep.append(line.split()[i])
+                    self.symm_info["orbitals_per_irrep"] = list(map(int, orbitals_per_irrep))
+
+                if line.strip().startswith('Number of basis functions'):
+                    nbasis = line.split()[-symmetry_count:]
+                    self.set_attribute('nbasis', sum(map(int, nbasis)))
+                    basis_per_irrep = []
+                    for i in range(4,symmetry_count+4):
+                        basis_per_irrep.append(line.split()[i])
+                    self.symm_info["basis_per_irrep"] = list(map(int, basis_per_irrep))
+                line = next(inputfile)
+            self.set_attribute('symm_info', self.symm_info)
+
         ###
         #        All orbitals with orbital energies smaller than  E(LUMO)+0.5 are printed
         #
@@ -891,16 +963,39 @@ class Molcas(logfileparser.Logfile):
                         # self.append_attribute('mocoeffs', mocoeffs)
                 # print ("aonames ", aonames_per_irrep)         # uncomment later
 
+        # This part is to read the symmetry species and basis functions per symmetry species. It is required by the
+        # following block of AO/SO.
 
+        if 'Nuclear Potential Energy' in line:
+
+            self.skip_lines(inputfile, ['d', 'b'])
+            line = next(inputfile)
+            line = next(inputfile)
+
+            if line.strip().startswith('Symmetry species'):
+                tokens = line.split()
+                symmetry_species = tokens[2:]
+                symmetry_count = len(symmetry_species)
+                line = next(inputfile)
+
+            if line.strip().startswith('Basis functions'):
+                basis_per_irrep = []
+                for i in range(2,symmetry_count+2):
+                    basis_per_irrep.append(line.split()[i])
+                basis_per_irrep = list(map(int, basis_per_irrep))
+                line = next(inputfile)
+
+        line_counter = 0; species_counter = 0
         if '++    SO/AO info:' in line:
 
             self.skip_lines(inputfile, ['d', 'b','s'])
             line = next(inputfile)
 
-            num_irrep = 8  # self.symm_info["symmetry_count"]
+            num_irrep = 8
             symm_adapted_basis = {}
             list_irrep = []
             basis_function_irrep = []
+            self.mosyms = []
 
             self.skip_lines(inputfile, ['d', 'b', 's'])
             line = next(inputfile)
@@ -910,6 +1005,7 @@ class Molcas(logfileparser.Logfile):
                     tokens = line.split()
 
                     if line.strip().startswith('Irreducible representation'):
+                        species_counter += 1
                         tokens = line.split()
                         list_irrep.append(tokens[3])
                         line = next(inputfile)
@@ -924,6 +1020,8 @@ class Molcas(logfileparser.Logfile):
 
                     tokens = line.split()
                     if len(tokens) != 0 and tokens[0] != '--':
+                        self.mosyms.append(list_irrep[species_counter-1])
+                        line_counter += 1
                         symm_adapted_basis.setdefault("iter", []).append(tokens[0])
                         symm_adapted_basis.setdefault("atom", []).append(tokens[1])
                         symm_adapted_basis.setdefault("type", []).append(tokens[2])
@@ -931,10 +1029,10 @@ class Molcas(logfileparser.Logfile):
                         symm_adapted_basis.setdefault("phase", []).append([tokens[i] for i in range(4, len(tokens), 2)])
                         # symm_adapted_basis.append("{atom}_{orbital}".format(atom=tokens[1], orbital=tokens[2]))
                     line = next(inputfile)
+            self.set_attribute('mosyms', self.mosyms)
 
 
             line=next(inputfile)
-            print ("irreps ", list_irrep)
             print ("basis_function_irrep ", basis_function_irrep)
             print ("symmetry adapted basis data ", symm_adapted_basis)         # uncomment later
             print ("equivalent centers")
@@ -951,25 +1049,24 @@ class Molcas(logfileparser.Logfile):
             print ("equivalent list ", equiv_center)
 
             # Finding and counting types of basis functions
-            import collections
-            types_of_basis_functions = collections.Counter([item[1:2] for item in symm_adapted_basis["type"]])
+            types_of_basis_functions = Counter([item[1:2] for item in symm_adapted_basis["type"]])
             print ("types of basis functions", types_of_basis_functions)
 
             testorb=[]
 
             num_irrep =  len(list_irrep)
-            # print ("where required ", hasattr(self, 'symm_info'))
-            # print ("num irrep ", num_irrep, self.symm_info["symmetry_count"])
-            # print (self.symm_info["basis_per_irrep"])
-
-            # for t in range(int(math.ceil(bas[i]/4.0))):
-                # print ("t ", t)
-            #     extlist=[ float(line2.split()[0][n:n+18]) for n in range(0,len(line2.split()[0]),18)]
-            #     testorb.extend(extlist)
-            #     line2=inporbf.readline()
-            # lc1=0
-            # lc2=0
-            # tabline_new=[]
+            irreps = OrderedDict(Counter(self.mosyms).items())
+            print (irreps, len(irreps))
+            for _, bas in irreps.items():
+                print (bas)
+                for t in range(int(math.ceil(bas/4.0))):
+                    print ("t ", t)
+                    # extlist=[ float(line2.split()[0][n:n+18]) for n in range(0,len(line2.split()[0]),18)]
+                    # testorb.extend(extlist)
+                    # line2=inporbf.readline()
+                lc1=0
+                lc2=0
+                tabline_new=[]
 
 
 
