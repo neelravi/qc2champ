@@ -942,7 +942,7 @@ class Molcas(logfileparser.Logfile):
                             j += 1
                         line = next(inputfile)
                         tokens = line.split()
-                    # print ("mocoeffs per irrep ", irrep,  mocoeffs_per_irrep[irrep])
+                    print ("mocoeffs per irrep ", irrep,  mocoeffs_per_irrep[irrep])
                         # self.set_attribute('aonames', aonames)
 
                 line=next(inputfile)
@@ -1052,18 +1052,26 @@ class Molcas(logfileparser.Logfile):
             types_of_basis_functions = Counter([item[1:2] for item in symm_adapted_basis["type"]])
             print ("types of basis functions", types_of_basis_functions)
 
-            testorb=[]
-
+            testorb=[]; m = 0
+            orbfile = open('cn5-c2v-BFD-Da-cas610_sym2.ScfOrb','r')
+            line2 = orbfile.readline()
+            new_coeffs=[]; m = 0
+            while ( (len(line2.split())<3) or (line2.split()[1]!='ORBITAL') or (int(line2.split()[2])!=1+1) ):
+                line2=orbfile.readline();  m=m+1
+            line2=orbfile.readline()
+            print ("line2 ", line2)
             num_irrep =  len(list_irrep)
             irreps = OrderedDict(Counter(self.mosyms).items())
             print (irreps, len(irreps))
             for _, bas in irreps.items():
                 print (bas)
                 for t in range(int(math.ceil(bas/4.0))):
-                    print ("t ", t)
-                    # extlist=[ float(line2.split()[0][n:n+18]) for n in range(0,len(line2.split()[0]),18)]
-                    # testorb.extend(extlist)
-                    # line2=inporbf.readline()
+
+                    print ("t ", t, "len(line2.split()[0]", len(line2.split()[0]))
+                    print ("new", line2.split(), len(line2.split()[0]))
+                    testorb.extend(list(map(float, line2.split())))
+                    # line2=orbfile.readline()
+                print ("testorb", testorb)
                 lc1=0
                 lc2=0
                 tabline_new=[]
