@@ -3,6 +3,7 @@
 ### partially edited by Ravindra
 import sys
 import math
+import numpy
 
 #Usage:
 if (len(sys.argv)<3):
@@ -736,7 +737,7 @@ def new_orb(inputf,inporbf):
             line2=next(inporbf)
           line2=next(inporbf)
         print ("float tokens in testorb", testorb)
-        sys.exit("stopping at OCHR")
+        # sys.exit("stopping at OCHR")
         lc1=0
         lc2=0
         tabline_new=[]
@@ -750,10 +751,12 @@ def new_orb(inputf,inporbf):
               copy=len(element)-1
           label=orb_list[n][1]
           for num in range(len(atoms)):
+            print (atoms, num)
             if (atoms[num][0]==label):
               nums=atoms[num][1]
               nump=3*atoms[num][2]
               numd=5*atoms[num][3]
+              print ("numd inside ", numd)
           for ns in range(len(orb_list[n][2])):
             tabline_new[lc2+ns]=(testorb[lc1+ns]*int(orb_list[n][2][ns][1][0]))/math.sqrt(div)
           if (orb_list[n][5]==1):
@@ -917,13 +920,21 @@ def new_orb(inputf,inporbf):
         lc1=lc1+len(orb_list[n][2])+len(orb_list[n][3])+len(orb_list[n][4])
         lc3=0
         lc4=lc2c-nums-nump-numd
+        print (lc2c,lc2,lc1,lc3,lc4)
+        print ("numd", numd)
         if (copy>0):
           for icopy in range(0,copy):
             sc=0
             pc=0
             dc=0
+            print ("icopy",icopy, "nums", nums, "nump", nump, "numd", numd, "copy", copy)
+            print ("shape of tabline_new", tabline_new)
             for ncops in range(nums):
+              print ("tabline_new[lc4+ncops]", len(tabline_new))
               if (tabline_new[lc4+ncops]!=0):
+                print (numpy.shape(orb_list))
+                print ("culprit",n, sc, 1+icopy)#,  orb_list[n][2][sc][1][1+icopy])
+                sys.exit()
                 tabline_new[lc3+lc2+ncops]=tabline_new[lc4+ncops]*int(orb_list[n][2][sc][1][1+icopy])
                 sc=sc+1
             for ncopp in range(nump):
