@@ -673,7 +673,6 @@ def new_orb(inputf,inporbf):
   d_list={'d0':0,'d2+':1,'d2-':2,'d1+':3,'d1-':4}
   ref_list=list()
   for i in range(len(comb_list)):
-    print ("nbas - ndel ", i)
     ref_list.append(comb_list[i][0])
   final_list=list()
   for i in range(nsymmspec):
@@ -686,7 +685,7 @@ def new_orb(inputf,inporbf):
         s_type=[]
         p_type=[]
         d_type=[]
-        print ("line1 ", line1)
+        # print ("line1 ", line1)
         center=line1.split()[3]
         label=line1.split()[1][:-1]
         while((len(line1.split())>=5) and (line1.split()[4]=='1') and (line1.split()[3]==center)):
@@ -723,10 +722,21 @@ def new_orb(inputf,inporbf):
       orbnum=int(line2.split()[3])
       line2=inporbf.readline()
       testorb=[]
-      for t in range(int(math.ceil(bas[i]/4.0))):
-        extlist=[ float(line2.split()[0][n:n+18]) for n in range(0,len(line2.split()[0]),18)]
-        testorb.extend(extlist)
-        line2=inporbf.readline()
+      tokens = line2.split()
+      sys.exit("stopping at OCHR")
+      while tokens and tokens[0] != '#OCC':
+        tokens = line2.split()
+        # Skip the line if it starts with * ORBITAL # #
+        if line2.strip().startswith('*'):
+          line2=next(inporbf)
+        else:
+          print ("tokens in line2", tokens[:])
+          extlist=[ float(x) for x in tokens]
+          testorb.extend(extlist)
+          line2=next(inporbf)
+        line2=next(inporbf)
+      print ("float tokens in testorb", testorb)
+      sys.exit("stopping at OCHR")
       lc1=0
       lc2=0
       tabline_new=[]
