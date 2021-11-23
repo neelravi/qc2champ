@@ -723,53 +723,53 @@ def new_orb(inputf,inporbf):
       line2=inporbf.readline()
       testorb=[]
       tokens = line2.split()
-      sys.exit("stopping at OCHR")
-      while tokens and tokens[0] != '#OCC':
-        tokens = line2.split()
-        # Skip the line if it starts with * ORBITAL # #
-        if line2.strip().startswith('*'):
+      # sys.exit("stopping at OCHR")
+      for line2 in inporbf:
+        while not line2.startswith('#OCC'):
+          tokens = line2.split()
+          # Skip the line if it starts with * ORBITAL # #
+          if line2.strip().startswith('*'):
+            line2=next(inporbf)
+          else:
+            extlist=[ float(x) for x in tokens]
+            testorb.extend(extlist)
+            line2=next(inporbf)
           line2=next(inporbf)
-        else:
-          print ("tokens in line2", tokens[:])
-          extlist=[ float(x) for x in tokens]
-          testorb.extend(extlist)
-          line2=next(inporbf)
-        line2=next(inporbf)
-      print ("float tokens in testorb", testorb)
-      sys.exit("stopping at OCHR")
-      lc1=0
-      lc2=0
-      tabline_new=[]
-      for count in range(nbas):
-        tabline_new.append(0.0)
-      for n in range(len(orb_list)):
-        center=orb_list[n][0]
-        for element in equiv_center:
-          if center in element[0]:
-            div=int(len(element))
-            copy=len(element)-1
-        label=orb_list[n][1]
-        for num in range(len(atoms)):
-          if (atoms[num][0]==label):
-            nums=atoms[num][1]
-            nump=3*atoms[num][2]
-            numd=5*atoms[num][3]
-        for ns in range(len(orb_list[n][2])):
-          tabline_new[lc2+ns]=(testorb[lc1+ns]*int(orb_list[n][2][ns][1][0]))/math.sqrt(div)
-        if (orb_list[n][5]==1):
-          if (orb_list[n][7]==['px']):
-            for np in range(len(orb_list[n][3])):
-              tabline_new[lc2+nums+np]=(testorb[lc1+len(orb_list[n][2])+np]*int(orb_list[n][3][np][1][0]))/math.sqrt(div)
-          elif (orb_list[n][7]==['py']):
-            for np in range(len(orb_list[n][3])):
-              tabline_new[lc2+nums+(nump/3)+np]=(testorb[lc1+len(orb_list[n][2])+np]*int(orb_list[n][3][np][1][0]))/math.sqrt(div)
-          elif (orb_list[n][7]==['pz']):
-            for np in range(len(orb_list[n][3])):
-              tabline_new[lc2+nums+(2*nump/3)+np]=(testorb[lc1+len(orb_list[n][2])+np]*int(orb_list[n][3][np][1][0]))/math.sqrt(div)
-        if (orb_list[n][5]==2):
-          if (orb_list[n][7]==['px','py']):
-            for np in range(len(orb_list[n][3])):
-              tabline_new[lc2+nums+np]=(testorb[lc1+len(orb_list[n][2])+np]*int(orb_list[n][3][np][1][0]))/math.sqrt(div)
+        print ("float tokens in testorb", testorb)
+        sys.exit("stopping at OCHR")
+        lc1=0
+        lc2=0
+        tabline_new=[]
+        for count in range(nbas):
+          tabline_new.append(0.0)
+        for n in range(len(orb_list)):
+          center=orb_list[n][0]
+          for element in equiv_center:
+            if center in element[0]:
+              div=int(len(element))
+              copy=len(element)-1
+          label=orb_list[n][1]
+          for num in range(len(atoms)):
+            if (atoms[num][0]==label):
+              nums=atoms[num][1]
+              nump=3*atoms[num][2]
+              numd=5*atoms[num][3]
+          for ns in range(len(orb_list[n][2])):
+            tabline_new[lc2+ns]=(testorb[lc1+ns]*int(orb_list[n][2][ns][1][0]))/math.sqrt(div)
+          if (orb_list[n][5]==1):
+            if (orb_list[n][7]==['px']):
+              for np in range(len(orb_list[n][3])):
+                tabline_new[lc2+nums+np]=(testorb[lc1+len(orb_list[n][2])+np]*int(orb_list[n][3][np][1][0]))/math.sqrt(div)
+            elif (orb_list[n][7]==['py']):
+              for np in range(len(orb_list[n][3])):
+                tabline_new[lc2+nums+(nump/3)+np]=(testorb[lc1+len(orb_list[n][2])+np]*int(orb_list[n][3][np][1][0]))/math.sqrt(div)
+            elif (orb_list[n][7]==['pz']):
+              for np in range(len(orb_list[n][3])):
+                tabline_new[lc2+nums+(2*nump/3)+np]=(testorb[lc1+len(orb_list[n][2])+np]*int(orb_list[n][3][np][1][0]))/math.sqrt(div)
+          if (orb_list[n][5]==2):
+            if (orb_list[n][7]==['px','py']):
+              for np in range(len(orb_list[n][3])):
+                tabline_new[lc2+nums+np]=(testorb[lc1+len(orb_list[n][2])+np]*int(orb_list[n][3][np][1][0]))/math.sqrt(div)
 	  elif (orb_list[n][7]==['py','pz']):
             for np in range(len(orb_list[n][3])):
               tabline_new[lc2+nums+(nump/3)+np]=(testorb[lc1+len(orb_list[n][2])+np]*int(orb_list[n][3][np][1][0]))/math.sqrt(div)
