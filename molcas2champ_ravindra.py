@@ -617,20 +617,23 @@ def active_orb(inputf):
   energy=[]
   occup_no=[]
   orbtype=[]
-  comb_list=list()
-  counter = 0
+  comb_list=[]
+  counter1 = 0; counter2 = 0
   if (run=='SCF'):
     for line in inputf:
         if line.strip().startswith("Title: SCF orbitals"):
             while not line.startswith('--'):
             # At this line Orbital index are listed like "Orbital            1         2         3         4         5         6         7         8         9        10"
               tokens = line.split()
-              print ("tokens ", tokens )
+              # print ("tokens ", tokens )
+
+              if line.strip().startswith('Molecular orbitals for symmetry species'):
+                counter2 += 1
+
               if line.strip().startswith('Orbital'):
-                print ("tokens inside", tokens )
                 orbital.extend(tokens[1:])
-                orbtype.append(counter)
-                counter += 1
+                counter1 += 1
+                orbtype.extend(str(counter2)*len(tokens[1:]))
                 line = next(inputf)
 
                 if line.strip().startswith('Energy'):
@@ -648,50 +651,15 @@ def active_orb(inputf):
     energy  = list(map(float, energy) )
     occup_no = list(map(float, occup_no))
     orbtype = list(map(int, orbtype))
-    print ("final orbtype  ", orbtype, len(orbtype))
-    # for i in range(nbas-ndeleted):
-    #   comb_list.append([(orbtype[i],orbital[i]),energy[i],occup_no[i]])
-    # comb_list=sorted(comb_list,key=lambda x : (x[1],-x[2]))
-    # occup_list=[]
-    # for i in range(len(comb_list)):
-    #   if (comb_list[i][2]>0.0):
-    #     occup_list.append(comb_list[i])
-  else:
-    while((len(line.split())<2) or (line.split()[0]+line.split()[1])!='Pseudonaturalactive'):
-      line=inputf.readline();l=l+1
-    for i in range(5):
-      line=inputf.readline();l=l+1
-    for i in range(nsymmspec):
-      while ((len(line.split())<4) or ((line.split()[0]+line.split()[1]+line.split()[2])!='Molecularorbitalsfor')):
-        line=inputf.readline();l=l+1
-      for k in range(bas[i]-symdel[i]):
-        orbtype.append(i+1)
-      line=inputf.readline()
-      line=inputf.readline()
-      line=inputf.readline()
-      for s in range(int(math.ceil((bas[i]-symdel[i])/10.0))):
-        for k in range(1,len(line.split())):
-          orbital.append(int(line.split()[k]))
-        line=inputf.readline()
-        for k in range(1,len(line.split())):
-          energy.append(float(line.split()[k]))
-        line=inputf.readline()
-        for k in range(2,len(line.split())):
-          occup_no.append(float(line.split()[k]))
-        for n in range(bas[i]+4):
-          line=inputf.readline();l=l+1
-    if ((len(orbital)!=nbas-ndeleted) or (len(energy)!=nbas-ndeleted) or (len(occup_no)!=nbas-ndeleted)):
-      print "Something is wrong in the loop!"
-      sys.exit()
-    else:
-      for i in range(nbas):
-        comb_list.append([(orbtype[i],orbital[i]),energy[i],occup_no[i]])
+
+    for i in range(len(orbital)):
+      comb_list.append([orbtype[i],orbital[i],energy[i],occup_no[i]])
     comb_list=sorted(comb_list,key=lambda x : (x[1],-x[2]))
     occup_list=[]
     for i in range(len(comb_list)):
-     if (comb_list[i][2]>0.0):
-       occup_list.append(comb_list[i])
-  return #occup_list,comb_list;
+      if (comb_list[i][2]>0.0):
+        occup_list.append(comb_list[i])
+  return occup_list,comb_list
 
 #Create a new orbital file to read from for the final orb file; instead of ScfOrb or RasOrb
 inputf=file(sys.argv[1])
