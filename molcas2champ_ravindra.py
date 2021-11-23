@@ -285,8 +285,8 @@ def equiv_centers(inputf):
   line=inputf.readline()
   line=inputf.readline()
   line=inputf.readline()
-  centers_list=list()
-  while (len(line.split())>=5):
+  centers_list=[]
+  while (len(line.split())>=5 and not 'Basis function(s)' in line):
     if (len(line.split())==5):
       if (line.split()[3] not in centers_list):
         centers_list.append((line.split()[3]))
@@ -307,7 +307,7 @@ def equiv_centers(inputf):
   for i in centers_list:
     if i not in equiv_center:
       equiv_center.append(i)
-  return equiv_center;
+  return equiv_center
 
 #####
 # Get orbital labels(kept in the original format): dictbas update
@@ -672,7 +672,8 @@ def new_orb(inputf,inporbf):
   p_list={'px':0,'py':1,'pz':2}
   d_list={'d0':0,'d2+':1,'d2-':2,'d1+':3,'d1-':4}
   ref_list=list()
-  for i in range(nbas-ndeleted):
+  for i in range(len(comb_list)):
+    print ("nbas - ndel ", i)
     ref_list.append(comb_list[i][0])
   final_list=list()
   for i in range(nsymmspec):
@@ -685,6 +686,7 @@ def new_orb(inputf,inporbf):
         s_type=[]
         p_type=[]
         d_type=[]
+        print ("line1 ", line1)
         center=line1.split()[3]
         label=line1.split()[1][:-1]
         while((len(line1.split())>=5) and (line1.split()[4]=='1') and (line1.split()[3]==center)):
@@ -1020,6 +1022,7 @@ if (nsymmspec>1):
   inputf=file(sys.argv[1])
   inporbf=file(sys.argv[2])
   equiv_center=equiv_centers(inputf)
+  print ("equivalent centers ", equiv_center)
   for element in equiv_center:
     if (len(element) > 1):
       print "Orbital coefficients for center ", element[0], "will be copied", len(element)-1,"times."
