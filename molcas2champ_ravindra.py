@@ -714,6 +714,8 @@ def new_orb(inputf,inporbf):
            nd_type.append(d_type[dtype][0])
         nptype=len(np_type)
         ndtype=len(nd_type)
+        print ("diagnosis one ", center, label,s_type,p_type,d_type)
+        print ("diagnosis " , nptype,ndtype,np_type,nd_type)
         orb_list.append([center,label,s_type,p_type,d_type,nptype,ndtype,np_type,nd_type])
     new_coeffs=[]
     while ( (len(line2.split())<3) or (line2.split()[1]!='ORBITAL') or (int(line2.split()[2])!=i+1) ):
