@@ -974,6 +974,9 @@ def new_orb(inputf,inporbf):
               for ncopd in range(numd):
                 # print ("another nothing")
                 if (tabline_new[lc4+nums+nump+ncopd]!=0):
+                  print ("dc", dc)
+                  print ("debug ", orb_list[n][4])
+                  print ("make sure that orb_list does not access more d elements")
                   tabline_new[lc3+lc2+nums+nump+ncopd]=tabline_new[lc4+nums+nump+ncopd]*int(orb_list[n][4][dc][1][icopy])
                 dc=dc+1
             lc3=lc3+nums+nump+numd
