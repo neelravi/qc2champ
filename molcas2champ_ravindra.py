@@ -678,7 +678,24 @@ def new_orb(inputf,inporbf):
   final_list=list()
   for i in range(nsymmspec):
     while ((len(line1.split())<2) or ((line1.split()[0]+line1.split()[1])!='Irreduciblerepresentation')):
+      print ("original skip", line1)
       line1=inputf.readline(); l=l+1
+    if line1.strip().startswith('Irreducible representation :'):
+      print ("do i come here ", line1)
+      l=l+1
+      line1=inputf.readline()
+    if line1.strip().startswith('Basis function(s) of irrep'):
+      l=l+1
+      line1=inputf.readline()
+
+    if line1.strip().startswith('Basis Label'):
+      line1=inputf.readline()
+      l=l+1
+
+    if len(line1.split()) <= 1: #Blank line
+      line1=inputf.readline()
+      l=l+1
+
     for c in range(4):
       line1=inputf.readline(); l=l+1
     orb_list=[]
@@ -686,7 +703,11 @@ def new_orb(inputf,inporbf):
         s_type=[]
         p_type=[]
         d_type=[]
-        # print ("line1 ", line1)
+        # Skip the empty lines in the main out file
+        if len(line1.split()) <= 1: #Blank line
+          line1=inputf.readline()
+          l=l+1
+        print ("line ", line1)
         center=line1.split()[3]
         label=line1.split()[1][:-1]
         while((len(line1.split())>=5) and (line1.split()[4]=='1') and (line1.split()[3]==center)):
@@ -730,14 +751,13 @@ def new_orb(inputf,inporbf):
       num_lines = int(round(bas[i]/5)) + [1 if bas[i] % 5 <= 4 else 0][0]
       for t in range(num_lines):  # number of lines to read
         tokens = line2.split()
-        print ("tokens inside", tokens, t, bas[i], bas[i]/5, bas[i] % 5)
+        # print ("tokens inside", tokens, t, bas[i], bas[i]/5, bas[i] % 5)
         if line2.strip().startswith('* ORBITAL'):
-          print ("orbitals ", line2)
           line2 = next(inporbf)
         extlist=[ float(x) for x in tokens]
         testorb.extend(extlist)
         line2=inporbf.readline()
-      print ("after reading everything ", testorb)
+      # print ("after reading everything ", testorb)
       lc1=0
       lc2=0
       tabline_new=[]
