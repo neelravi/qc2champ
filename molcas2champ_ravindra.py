@@ -724,57 +724,50 @@ def new_orb(inputf,inporbf):
       symclass=int(line2.split()[2])
       orbnum=int(line2.split()[3])
       line2=inporbf.readline()
-      testorb=[]
       tokens = line2.split()
-      # sys.exit("stopping at OCHR")
-      for line2 in inporbf:
-        while not line2.startswith('#OCC'):
-          tokens = line2.split()
-          # Skip the line if it starts with * ORBITAL # #
-          if line2.strip().startswith('*'):
-            line2=next(inporbf)
-          else:
-            extlist=[ float(x) for x in tokens]
-            testorb.extend(extlist)
-            line2=next(inporbf)
-          line2=next(inporbf)
-        print ("float tokens in testorb", testorb)
-        # sys.exit("stopping at OCHR")
-        lc1=0
-        lc2=0
-        tabline_new=[]
-        for count in range(nbas):
-          tabline_new.append(0.0)
-        for n in range(len(orb_list)):
-          center=orb_list[n][0]
-          for element in equiv_center:
-            if center in element[0]:
-              div=int(len(element))
-              copy=len(element)-1
-          label=orb_list[n][1]
-          for num in range(len(atoms)):
-            print (atoms, num)
-            if (atoms[num][0]==label):
-              nums=atoms[num][1]
-              nump=3*atoms[num][2]
-              numd=5*atoms[num][3]
-              print ("numd inside ", numd)
-          for ns in range(len(orb_list[n][2])):
-            tabline_new[lc2+ns]=(testorb[lc1+ns]*int(orb_list[n][2][ns][1][0]))/math.sqrt(div)
-          if (orb_list[n][5]==1):
-            if (orb_list[n][7]==['px']):
-              for np in range(len(orb_list[n][3])):
-                tabline_new[lc2+nums+np]=(testorb[lc1+len(orb_list[n][2])+np]*int(orb_list[n][3][np][1][0]))/math.sqrt(div)
-            elif (orb_list[n][7]==['py']):
-              for np in range(len(orb_list[n][3])):
-                tabline_new[lc2+nums+(nump/3)+np]=(testorb[lc1+len(orb_list[n][2])+np]*int(orb_list[n][3][np][1][0]))/math.sqrt(div)
-            elif (orb_list[n][7]==['pz']):
-              for np in range(len(orb_list[n][3])):
-                tabline_new[lc2+nums+(2*nump/3)+np]=(testorb[lc1+len(orb_list[n][2])+np]*int(orb_list[n][3][np][1][0]))/math.sqrt(div)
-          if (orb_list[n][5]==2):
-            if (orb_list[n][7]==['px','py']):
-              for np in range(len(orb_list[n][3])):
-                tabline_new[lc2+nums+np]=(testorb[lc1+len(orb_list[n][2])+np]*int(orb_list[n][3][np][1][0]))/math.sqrt(div)
+      testorb=[]
+      for t in range(bas[i]/5 + bas[i] % 5):  # number of lines to read
+        tokens = line2.split()
+        print ("tokens inside", tokens)
+        if line2.strip().startswith('* ORBITAL'):
+          line2 = inporbf.readline()
+        extlist=[ float(x) for x in tokens]
+        testorb.extend(extlist)
+        line2=inporbf.readline()
+      print ("after reading everything ", testorb)
+      lc1=0
+      lc2=0
+      tabline_new=[]
+      for count in range(nbas):
+        tabline_new.append(0.0)
+      for n in range(len(orb_list)):
+        center=orb_list[n][0]
+        for element in equiv_center:
+          if center in element[0]:
+            div=int(len(element))
+            copy=len(element)-1
+        label=orb_list[n][1]
+        for num in range(len(atoms)):
+          if (atoms[num][0]==label):
+            nums=atoms[num][1]
+            nump=3*atoms[num][2]
+            numd=5*atoms[num][3]
+        for ns in range(len(orb_list[n][2])):
+          tabline_new[lc2+ns]=(testorb[lc1+ns]*int(orb_list[n][2][ns][1][0]))/math.sqrt(div)
+        if (orb_list[n][5]==1):
+          if (orb_list[n][7]==['px']):
+            for np in range(len(orb_list[n][3])):
+              tabline_new[lc2+nums+np]=(testorb[lc1+len(orb_list[n][2])+np]*int(orb_list[n][3][np][1][0]))/math.sqrt(div)
+          elif (orb_list[n][7]==['py']):
+            for np in range(len(orb_list[n][3])):
+              tabline_new[lc2+nums+(nump/3)+np]=(testorb[lc1+len(orb_list[n][2])+np]*int(orb_list[n][3][np][1][0]))/math.sqrt(div)
+          elif (orb_list[n][7]==['pz']):
+            for np in range(len(orb_list[n][3])):
+              tabline_new[lc2+nums+(2*nump/3)+np]=(testorb[lc1+len(orb_list[n][2])+np]*int(orb_list[n][3][np][1][0]))/math.sqrt(div)
+        if (orb_list[n][5]==2):
+          if (orb_list[n][7]==['px','py']):
+            for np in range(len(orb_list[n][3])):
+              tabline_new[lc2+nums+np]=(testorb[lc1+len(orb_list[n][2])+np]*int(orb_list[n][3][np][1][0]))/math.sqrt(div)
 	  elif (orb_list[n][7]==['py','pz']):
             for np in range(len(orb_list[n][3])):
               tabline_new[lc2+nums+(nump/3)+np]=(testorb[lc1+len(orb_list[n][2])+np]*int(orb_list[n][3][np][1][0]))/math.sqrt(div)
@@ -782,7 +775,8 @@ def new_orb(inputf,inporbf):
             for np1 in range(len(orb_list[n][3])/2):
               tabline_new[lc2+nums+np1]=(testorb[lc1+len(orb_list[n][2])+np1]*int(orb_list[n][3][np1][1][0]))/math.sqrt(div)
             for np2 in range(len(orb_list[n][3])/2):
-              tabline_new[lc2+nums+(2*nump/3)+np2]=(testorb[lc1+len(orb_list[n][2])+(len(orb_list[n][3])/2)+np2]*int(orb_list[n][3][(len(orb_list[n][3])/2)+np2]))/math.sqrt(div)
+              print ("np2, RANGE , int argument ", np2,  len(orb_list[n][3])/2, orb_list[n][3])
+              tabline_new[lc2+nums+(2*nump/3)+np2]=(testorb[lc1+len(orb_list[n][2])+(len(orb_list[n][3])/2)+np2]*int(orb_list[n][3][(len(orb_list[n][3])/2)+np2][1][0]))/math.sqrt(div)
         if (orb_list[n][5]==3):
           for np in range(len(orb_list[n][3])):
             tabline_new[lc2+nums+np]=(testorb[lc1+len(orb_list[n][2])+np]*int(orb_list[n][3][np][1][0]))/math.sqrt(div)
@@ -917,42 +911,36 @@ def new_orb(inputf,inporbf):
         if (orb_list[n][6]==5):
             for nd in range(len(orb_list[n][4])):
               tabline_new[lc2+nums+nump+nd]=(testorb[lc1+len(orb_list[n][2])+len(orb_list[n][3])+nd]*int(orb_list[n][4][nd][1][0]))/math.sqrt(div)
-        lc2=lc2+nums+nump+numd
+        lc2=lc2+nums+nump+numd-1
         lc2c=lc2
         lc1=lc1+len(orb_list[n][2])+len(orb_list[n][3])+len(orb_list[n][4])
         lc3=0
         lc4=lc2c-nums-nump-numd
-        print (lc2c,lc2,lc1,lc3,lc4)
-        print ("numd", numd)
         if (copy>0):
           for icopy in range(0,copy):
             sc=0
             pc=0
             dc=0
-            print ("icopy",icopy, "nums", nums, "nump", nump, "numd", numd, "copy", copy)
-            print ("shape of tabline_new", tabline_new)
             for ncops in range(nums):
-              print ("tabline_new[lc4+ncops]", len(tabline_new))
               if (tabline_new[lc4+ncops]!=0):
-                print (numpy.shape(orb_list))
-                print ("culprit",n, sc, 1+icopy)#,  orb_list[n][2][sc][1][1+icopy])
-                sys.exit()
-                tabline_new[lc3+lc2+ncops]=tabline_new[lc4+ncops]*int(orb_list[n][2][sc][1][1+icopy])
+                print ("indices lc3+lc2+ncops", lc3, lc2, ncops, lc3+lc2+ncops)
+                print ("another issue ", numpy.shape(tabline_new))
+                tabline_new[lc3+lc2+ncops]=tabline_new[lc4+ncops]*int(orb_list[n][2][sc][1][icopy])
                 sc=sc+1
             for ncopp in range(nump):
               if (tabline_new[lc4+nums+ncopp]!=0):
-                tabline_new[lc3+lc2+nums+ncopp]=tabline_new[lc4+nums+ncopp]*int(orb_list[n][3][pc][1][1+icopy])
+                tabline_new[lc3+lc2+nums+ncopp]=tabline_new[lc4+nums+ncopp]*int(orb_list[n][3][pc][1][icopy])
                 pc=pc+1
             if (numd>0):
               for ncopd in range(numd):
                 if (tabline_new[lc4+nums+nump+ncopd]!=0):
-                  tabline_new[lc3+lc2+nums+nump+ncopd]=tabline_new[lc4+nums+nump+ncopd]*int(orb_list[n][4][dc][1][1+icopy])
+                  tabline_new[lc3+lc2+nums+nump+ncopd]=tabline_new[lc4+nums+nump+ncopd]*int(orb_list[n][4][dc][1][icopy])
                   dc=dc+1
             lc3=lc3+nums+nump+numd
             lc2=lc2+nums+nump+numd
       final_list.append([(symclass,orbnum),tabline_new])
   final_list= sorted(final_list, key=lambda x: ref_list.index(x[0]))
-  return final_list;
+  return final_list
 
 #open and read the orbital file:
 inporbf=file(sys.argv[2])
