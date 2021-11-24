@@ -726,11 +726,14 @@ def new_orb(inputf,inporbf):
       line2=inporbf.readline()
       tokens = line2.split()
       testorb=[]
-      for t in range(bas[i]/5 + bas[i] % 5):  # number of lines to read
+      # Get the number of lines per block. Five numbers per line
+      num_lines = int(round(bas[i]/5)) + [1 if bas[i] % 5 <= 4 else 0][0]
+      for t in range(num_lines):  # number of lines to read
         tokens = line2.split()
-        print ("tokens inside", tokens)
+        print ("tokens inside", tokens, t, bas[i], bas[i]/5, bas[i] % 5)
         if line2.strip().startswith('* ORBITAL'):
-          line2 = inporbf.readline()
+          print ("orbitals ", line2)
+          line2 = next(inporbf)
         extlist=[ float(x) for x in tokens]
         testorb.extend(extlist)
         line2=inporbf.readline()
@@ -775,7 +778,6 @@ def new_orb(inputf,inporbf):
             for np1 in range(len(orb_list[n][3])/2):
               tabline_new[lc2+nums+np1]=(testorb[lc1+len(orb_list[n][2])+np1]*int(orb_list[n][3][np1][1][0]))/math.sqrt(div)
             for np2 in range(len(orb_list[n][3])/2):
-              print ("np2, RANGE , int argument ", np2,  len(orb_list[n][3])/2, orb_list[n][3])
               tabline_new[lc2+nums+(2*nump/3)+np2]=(testorb[lc1+len(orb_list[n][2])+(len(orb_list[n][3])/2)+np2]*int(orb_list[n][3][(len(orb_list[n][3])/2)+np2][1][0]))/math.sqrt(div)
         if (orb_list[n][5]==3):
           for np in range(len(orb_list[n][3])):
@@ -923,8 +925,6 @@ def new_orb(inputf,inporbf):
             dc=0
             for ncops in range(nums):
               if (tabline_new[lc4+ncops]!=0):
-                print ("indices lc3+lc2+ncops", lc3, lc2, ncops, lc3+lc2+ncops)
-                print ("another issue ", numpy.shape(tabline_new))
                 tabline_new[lc3+lc2+ncops]=tabline_new[lc4+ncops]*int(orb_list[n][2][sc][1][icopy])
                 sc=sc+1
             for ncopp in range(nump):
