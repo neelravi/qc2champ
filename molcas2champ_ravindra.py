@@ -678,23 +678,22 @@ def new_orb(inputf,inporbf):
   final_list=list()
   for i in range(nsymmspec):
     while ((len(line1.split())<2) or ((line1.split()[0]+line1.split()[1])!='Irreduciblerepresentation')):
-      print ("original skip", line1)
       line1=inputf.readline(); l=l+1
     if line1.strip().startswith('Irreducible representation :'):
-      print ("do i come here ", line1)
       l=l+1
       line1=inputf.readline()
     if line1.strip().startswith('Basis function(s) of irrep'):
       l=l+1
       line1=inputf.readline()
 
+    if len(line1.split()) <= 1: #Blank line
+      line1=inputf.readline()
+      l=l+1
+
     if line1.strip().startswith('Basis Label'):
       line1=inputf.readline()
       l=l+1
 
-    if len(line1.split()) <= 1: #Blank line
-      line1=inputf.readline()
-      l=l+1
 
     for c in range(4):
       line1=inputf.readline(); l=l+1
@@ -704,10 +703,28 @@ def new_orb(inputf,inporbf):
         p_type=[]
         d_type=[]
         # Skip the empty lines in the main out file
+
         if len(line1.split()) <= 1: #Blank line
           line1=inputf.readline()
           l=l+1
-        print ("line ", line1)
+
+        if line1.strip().startswith('Irreducible representation :'):
+          l=l+1
+          line1=inputf.readline()
+
+        if line1.strip().startswith('Basis function(s) of irrep'):
+          l=l+1
+          line1=inputf.readline()
+
+        if len(line1.split()) <= 1: #Blank line
+          line1=inputf.readline()
+          l=l+1
+
+        if line1.strip().startswith('Basis Label'):
+          line1=inputf.readline()
+          l=l+1
+
+        print ("line in the range equiv center", line1)
         center=line1.split()[3]
         label=line1.split()[1][:-1]
         while((len(line1.split())>=5) and (line1.split()[4]=='1') and (line1.split()[3]==center)):
@@ -736,7 +753,6 @@ def new_orb(inputf,inporbf):
         nptype=len(np_type)
         ndtype=len(nd_type)
         print ("diagnosis one ", center, label,s_type,p_type,d_type)
-        print ("diagnosis " , nptype,ndtype,np_type,nd_type)
         orb_list.append([center,label,s_type,p_type,d_type,nptype,ndtype,np_type,nd_type])
     new_coeffs=[]
     while ( (len(line2.split())<3) or (line2.split()[1]!='ORBITAL') or (int(line2.split()[2])!=i+1) ):
@@ -945,7 +961,10 @@ def new_orb(inputf,inporbf):
             dc=0
             for ncops in range(nums):
               if (tabline_new[lc4+ncops]!=0):
-                tabline_new[lc3+lc2+ncops]=tabline_new[lc4+ncops]*int(orb_list[n][2][sc][1][icopy])
+                print ("lc3+lc2+ncops", lc3,lc2,ncops, lc3+lc2+ncops)
+                print ("l4 icopy ", lc4,ncops, lc4+ncops, icopy)
+                print ("culprit again ", "sc", sc, orb_list[n][1])
+                tabline_new[lc3+lc2+ncops]=tabline_new[lc4+ncops]*int(orb_list[n][1][sc][1][icopy])
                 sc=sc+1
             for ncopp in range(nump):
               if (tabline_new[lc4+nums+ncopp]!=0):
@@ -953,9 +972,10 @@ def new_orb(inputf,inporbf):
                 pc=pc+1
             if (numd>0):
               for ncopd in range(numd):
+                # print ("another nothing")
                 if (tabline_new[lc4+nums+nump+ncopd]!=0):
                   tabline_new[lc3+lc2+nums+nump+ncopd]=tabline_new[lc4+nums+nump+ncopd]*int(orb_list[n][4][dc][1][icopy])
-                  dc=dc+1
+                dc=dc+1
             lc3=lc3+nums+nump+numd
             lc2=lc2+nums+nump+numd
       final_list.append([(symclass,orbnum),tabline_new])
