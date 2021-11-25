@@ -788,6 +788,7 @@ def new_orb(inputf,inporbf):
         label=orb_list[n][1]
         for num in range(len(atoms)):
           if (atoms[num][0]==label):
+            print ("atoms ", atoms[num], nptype)
             nums=atoms[num][1]
             nump=3*atoms[num][2]
             numd=5*atoms[num][3]
@@ -963,22 +964,24 @@ def new_orb(inputf,inporbf):
               if (tabline_new[lc4+ncops]!=0):
                 print ("lc3+lc2+ncops", lc3,lc2,ncops, lc3+lc2+ncops)
                 print ("l4 icopy ", lc4,ncops, lc4+ncops, icopy)
-                print ("culprit again ", "sc", sc, orb_list[n][1])
-                tabline_new[lc3+lc2+ncops]=tabline_new[lc4+ncops]*int(orb_list[n][1][sc][1][icopy])
+                print ("culprit again full  ", orb_list[n])
+                print ("culprit again       ", orb_list[n][2][sc])
+                tabline_new[lc3+lc2+ncops]=tabline_new[lc4+ncops]*int(orb_list[n][2][sc][1][icopy])
                 sc=sc+1
             for ncopp in range(nump):
               if (tabline_new[lc4+nums+ncopp]!=0):
                 tabline_new[lc3+lc2+nums+ncopp]=tabline_new[lc4+nums+ncopp]*int(orb_list[n][3][pc][1][icopy])
                 pc=pc+1
-            if (numd>0):
-              for ncopd in range(numd):
-                # print ("another nothing")
-                if (tabline_new[lc4+nums+nump+ncopd]!=0):
-                  print ("dc", dc)
-                  print ("debug ", orb_list[n][4])
-                  print ("make sure that orb_list does not access more d elements")
-                  tabline_new[lc3+lc2+nums+nump+ncopd]=tabline_new[lc4+nums+nump+ncopd]*int(orb_list[n][4][dc][1][icopy])
-                dc=dc+1
+            # if (numd>0):
+            #   for ncopd in range(numd-2):
+            #     print ("range numd ", numd)
+            #     # print ("another nothing")
+            #     if (tabline_new[lc4+nums+nump+ncopd]!=0):
+            #       print ("dc", dc)
+            #       print ("debug ", orb_list[n])
+            #       print ("make sure that orb_list does not access more d elements")
+            #       tabline_new[lc3+lc2+nums+nump+ncopd]=tabline_new[lc4+nums+nump+ncopd]*int(orb_list[n][4][dc][1][icopy])
+            #     dc=dc+1
             lc3=lc3+nums+nump+numd
             lc2=lc2+nums+nump+numd
       final_list.append([(symclass,orbnum),tabline_new])
