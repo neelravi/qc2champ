@@ -909,18 +909,16 @@ class Molcas(logfileparser.Logfile):
 
                 line = next(inputfile)
                 tokens = line.split()
-                print ("outside ", tokens)
                 irrep = 0
                 while not line.strip() == "--":
                     line = next(inputfile)
                     tokens = line.split()
                     if line.strip().startswith('Molecular orbitals for symmetry species'):
+                        irrep += 1
                         line = next(inputfile)
 
                     if line.strip().startswith('Orbital'):
                         orbital_index_per_irrep[irrep].extend(line.split()[1:])
-                        for i in orbital_index_per_irrep[irrep]:
-                            mocoeffs_per_irrep[irrep].append([])
                         line = next(inputfile)
 
                     if line.strip().startswith('Energy'):
@@ -940,16 +938,13 @@ class Molcas(logfileparser.Logfile):
 
                     info = tokens[3:]
                     j = 0
-                    print ("info", tokens)
-                    # for i in orbital_index_per_irrep[irrep]:
-                    mocoeffs_per_irrep[irrep].append( [ float(x) for x in tokens[3:]])
-                        # j += 1
-                    # line = next(inputfile)
-                    # tokens = line.split()
+                    if tokens != []:
+                        mocoeffs_per_irrep[irrep].extend([ float(x) for x in tokens[3:]])
                     # self.set_attribute('aonames', aonames)
 
-                    # line=next(inputfile)
-                print ("mocoeffs per irrep ", mocoeffs_per_irrep)
+                print ("mocoeffs per irrep ", mocoeffs_per_irrep[3])
+
+
 
                         # if len(moenergies_per_irrep[irrep]) != self.symm_info["orbitals_per_irrep"][irrep]:
                         #     moenergies_per_irrep[irrep].extend([numpy.nan for x in range(self.symm_info["orbitals_per_irrep"][irrep] - len(moenergies_per_irrep[irrep]))])
