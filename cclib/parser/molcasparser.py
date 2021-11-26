@@ -868,107 +868,7 @@ class Molcas(logfileparser.Logfile):
                 line = next(inputfile)
             self.set_attribute('symm_info', self.symm_info)
 
-        ###
-        #        All orbitals with orbital energies smaller than  E(LUMO)+0.5 are printed
-        #
-        #  ++    Molecular orbitals:
-        #        -------------------
-        #
-        #        Title: RKS-DFT orbitals
-        #
-        #        Molecular orbitals for symmetry species 1: a
-        #
-        #            Orbital        1         2         3         4         5         6         7         8         9        10
-        #            Energy      -10.0179  -10.0179  -10.0075  -10.0075  -10.0066  -10.0066  -10.0056  -10.0055   -9.9919   -9.9919
-        #            Occ. No.      2.0000    2.0000    2.0000    2.0000    2.0000    2.0000    2.0000    2.0000    2.0000    2.0000
-        #
-        #          1 C1    1s     -0.6990    0.6989    0.0342    0.0346    0.0264   -0.0145   -0.0124   -0.0275   -0.0004   -0.0004
-        #          2 C1    2s     -0.0319    0.0317   -0.0034   -0.0033   -0.0078    0.0034    0.0041    0.0073   -0.0002   -0.0002
-        # ...
-        # ...
-        #         58 H18   1s      0.2678
-        #         59 H19   1s     -0.2473
-        #         60 H20   1s      0.1835
-        #  --
-        if '++    Molecular orbitals:' in line:
-
-            self.skip_lines(inputfile, ['d', 'b'])
-            line = next(inputfile)
-
-            # We don't currently support parsing natural orbitals or active space orbitals.
-            if 'Natural orbitals' not in line and "Pseudonatural" not in line and 'Quasi-canonical orbitals' not in line:
-                self.skip_line(inputfile, 'b')
-
-
-                homos = 0
-                num_irrep =  self.symm_info["symmetry_count"]
-                print ("self nbasis", self.nbasis)
-                mocoeffs_per_irrep = [[] for i in range(num_irrep)]
-                moenergies_per_irrep = [[] for i in range(num_irrep)]
-                mocoefficients = numpy.zeros(shape=(self.nbasis, self.nbasis))
-                # aonames_per_irrep = [[] for i in range(num_irrep)]
-                orbital_index_per_irrep = [[] for i in range(num_irrep)]
-
-                line = next(inputfile)
-                tokens = line.split()
-                irrep = 0
-                while not line.strip() == "--":
-                    line = next(inputfile)
-                    tokens = line.split()
-                    if line.strip().startswith('Molecular orbitals for symmetry species'):
-                        irrep += 1
-                        line = next(inputfile)
-
-                    if line.strip().startswith('Orbital'):
-                        orbital_index_per_irrep[irrep].extend(line.split()[1:])
-                        print ("orbitals ", orbital_index_per_irrep[irrep])
-                        line = next(inputfile)
-
-                    if line.strip().startswith('Energy'):
-                        energies = [utils.convertor(float(x), 'hartree', 'eV') for x in line.split()[1:]]
-                        moenergies_per_irrep[irrep].extend(energies)
-                        line = next(inputfile)
-
-                    if 'Occ. No.' in line:
-                        for i in line.split()[2:]:
-                            if float(i) != 0:
-                                homos += 1
-                        self.skip_line(inputfile, 'b')
-                        line = next(inputfile)
-
-                    tokens = line.split()
-                    # aonames_per_irrep[irrep].append("{atom}_{orbital}".format(atom=tokens[1], orbital=tokens[2]))
-
-                    info = tokens[3:]
-                    j = 0
-                    # if tokens != []:
-                    mocoeffs_per_irrep[irrep].extend([ float(x) for x in tokens[3:]])
-                    # self.set_attribute('aonames', aonames)
-
-                print ("mocoeffs per irrep ", mocoeffs_per_irrep[3])
-
-
-
-                        # if len(moenergies_per_irrep[irrep]) != self.symm_info["orbitals_per_irrep"][irrep]:
-                        #     moenergies_per_irrep[irrep].extend([numpy.nan for x in range(self.symm_info["orbitals_per_irrep"][irrep] - len(moenergies_per_irrep[irrep]))])
-
-                        # self.append_attribute('moenergies', moenergies_per_irrep[irrep])
-
-                        # if not hasattr(self, 'homos'):
-                        #     self.homos = []
-                        # self.homos.extend([homos-1])
-
-                        # while len(mocoeffs_per_irrep[irrep]) < self.symm_info["orbitals_per_irrep"][irrep]:
-                        #     nan_array = [numpy.nan for i in range(self.symm_info["basis_per_irrep"][irrep])]
-                        #     mocoeffs_per_irrep[irrep].append(nan_array)
-
-                        # self.append_attribute('mocoeffs', mocoeffs)
-                # print ("aonames ", aonames_per_irrep)         # uncomment later
-
-
-        # This part is to read the symmetry species and basis functions per symmetry species. It is required by the
-        # following block of AO/SO.
-
+##      Some more information about the symmetry and AOs:
         if 'Nuclear Potential Energy' in line:
 
             self.skip_lines(inputfile, ['d', 'b'])
@@ -1069,30 +969,105 @@ class Molcas(logfileparser.Logfile):
             print (irreps, len(irreps))
             for _, bas in irreps.items():
                 print (bas)
+            ## AO information ends here
 
-                # # Get the number of lines per block. Five numbers per line
-                # num_lines = int(round(bas/5)) + [1 if bas % 5 <= 4 else 0][0]
-                # for t in range(num_lines):  # number of lines to read
-                #     tokens = line2.split()
-                #     print ("tokens inside", tokens, t)
-                #     extlist=[ float(x) for x in tokens]
-                #     testorb.extend(extlist)
-                #     if line2.strip().startswith('* ORBITAL'):
-                #         line2 = next(orbfile)
-                #         print ("line2 inside", line2)
-                #     line2 = next(orbfile)
-                # print ("testorb after first round", testorb)
+        ###
+        #        All orbitals with orbital energies smaller than  E(LUMO)+0.5 are printed
+        #
+        #  ++    Molecular orbitals:
+        #        -------------------
+        #
+        #        Title: RKS-DFT orbitals
+        #
+        #        Molecular orbitals for symmetry species 1: a
+        #
+        #            Orbital        1         2         3         4         5         6         7         8         9        10
+        #            Energy      -10.0179  -10.0179  -10.0075  -10.0075  -10.0066  -10.0066  -10.0056  -10.0055   -9.9919   -9.9919
+        #            Occ. No.      2.0000    2.0000    2.0000    2.0000    2.0000    2.0000    2.0000    2.0000    2.0000    2.0000
+        #
+        #          1 C1    1s     -0.6990    0.6989    0.0342    0.0346    0.0264   -0.0145   -0.0124   -0.0275   -0.0004   -0.0004
+        #          2 C1    2s     -0.0319    0.0317   -0.0034   -0.0033   -0.0078    0.0034    0.0041    0.0073   -0.0002   -0.0002
+        # ...
+        # ...
+        #         58 H18   1s      0.2678
+        #         59 H19   1s     -0.2473
+        #         60 H20   1s      0.1835
+        #  --
+        if '++    Molecular orbitals:' in line:
 
-                # for t in range(int(math.ceil(bas/4.0))):
+            self.skip_lines(inputfile, ['d', 'b'])
+            line = next(inputfile)
 
-                #     print ("t ", t, "len(line2.split()[0]", len(line2.split()[0]))
-                #     print ("new", line2.split(), len(line2.split()[0]))
-                #     testorb.extend(list(map(float, line2.split())))
-                #     # line2=orbfile.readline()
-                # print ("testorb", testorb)
-                # lc1=0
-                # lc2=0
-                # tabline_new=[]
+            # We don't currently support parsing natural orbitals or active space orbitals.
+            if 'Natural orbitals' not in line and "Pseudonatural" not in line and 'Quasi-canonical orbitals' not in line:
+                self.skip_line(inputfile, 'b')
+
+                homos = 0
+                num_irrep =  self.symm_info["symmetry_count"]
+                mocoeffs_per_irrep = [[] for i in range(num_irrep)]
+                moenergies_per_irrep = [[] for i in range(num_irrep)]
+                mocoefficients = numpy.zeros(shape=(self.nbasis, self.nbasis))
+                # aonames_per_irrep = [[] for i in range(num_irrep)]
+                orbital_index_per_irrep = [[] for i in range(num_irrep)]
+
+                line = next(inputfile)
+                tokens = line.split()
+                irrep = 0
+                while not line.strip() == "--":
+                    line = next(inputfile)
+                    tokens = line.split()
+                    if line.strip().startswith('Molecular orbitals for symmetry species'):
+                        irrep += 1
+                        line = next(inputfile)
+
+                    if line.strip().startswith('Orbital'):
+                        orbital_index_per_irrep[irrep].extend(line.split()[1:])
+                        print ("orbitals ", orbital_index_per_irrep[irrep])
+                        line = next(inputfile)
+
+                    if line.strip().startswith('Energy'):
+                        energies = [utils.convertor(float(x), 'hartree', 'eV') for x in line.split()[1:]]
+                        moenergies_per_irrep[irrep].extend(energies)
+                        line = next(inputfile)
+
+                    if 'Occ. No.' in line:
+                        for i in line.split()[2:]:
+                            if float(i) != 0:
+                                homos += 1
+                        self.skip_line(inputfile, 'b')
+                        line = next(inputfile)
+
+                    tokens = line.split()
+                    # aonames_per_irrep[irrep].append("{atom}_{orbital}".format(atom=tokens[1], orbital=tokens[2]))
+
+                    info = tokens[3:]
+                    j = 0
+                    mocoeffs_per_irrep[irrep].extend([ float(x) for x in tokens[3:]])
+                    # self.set_attribute('aonames', aonames)
+
+                print ("mocoeffs per irrep ", mocoeffs_per_irrep[3])
+
+
+
+                        # if len(moenergies_per_irrep[irrep]) != self.symm_info["orbitals_per_irrep"][irrep]:
+                        #     moenergies_per_irrep[irrep].extend([numpy.nan for x in range(self.symm_info["orbitals_per_irrep"][irrep] - len(moenergies_per_irrep[irrep]))])
+
+                        # self.append_attribute('moenergies', moenergies_per_irrep[irrep])
+
+                        # if not hasattr(self, 'homos'):
+                        #     self.homos = []
+                        # self.homos.extend([homos-1])
+
+                        # while len(mocoeffs_per_irrep[irrep]) < self.symm_info["orbitals_per_irrep"][irrep]:
+                        #     nan_array = [numpy.nan for i in range(self.symm_info["basis_per_irrep"][irrep])]
+                        #     mocoeffs_per_irrep[irrep].append(nan_array)
+
+                        # self.append_attribute('mocoeffs', mocoeffs)
+                # print ("aonames ", aonames_per_irrep)         # uncomment later
+
+
+        # This part is to read the symmetry species and basis functions per symmetry species. It is required by the
+        # following block of AO/SO.
 
 
 

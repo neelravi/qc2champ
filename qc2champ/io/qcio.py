@@ -545,7 +545,7 @@ def write_champ_v2_sym(ccobj, outputdest=None):
             with open(outputdest + ".sym", 'w') as file:
                 values, counts = np.unique(ccobj.mosyms, return_counts=True)
                 # point group symmetry independent line printed below
-                file.write("sym_labels " + str(len(counts)) + " " + str(len(ccobj.mosyms[0]))+"\n")
+                file.write("sym_labels " + str(len(counts)) + " " + str(len(ccobj.mosyms))+"\n")
 
                 irrep_string = ""
                 irrep_correspondence = {}
