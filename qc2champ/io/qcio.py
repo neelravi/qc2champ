@@ -541,9 +541,8 @@ def write_champ_v2_sym(ccobj, outputdest=None):
 
     if outputdest is not None:
         if isinstance(outputdest, str):
-            ## Write down a symmetry file in old champ format
+            ## Write down a symmetry file in champ format
             with open(outputdest + ".sym", 'w') as file:
-
                 values, counts = np.unique(ccobj.mosyms, return_counts=True)
                 # point group symmetry independent line printed below
                 file.write("sym_labels " + str(len(counts)) + " " + str(len(ccobj.mosyms[0]))+"\n")
@@ -554,10 +553,10 @@ def write_champ_v2_sym(ccobj, outputdest=None):
                     irrep_correspondence[val] = i+1
                     irrep_string += " " + str(i+1) + " " + str(val)
 
-                if all(irreps in ccobj.mosyms[0] for irreps in values):
+                if all(irreps in ccobj.mosyms for irreps in values):
                     file.write(f"{irrep_string} \n")   # This defines the rule
 
-                    for item in ccobj.mosyms[0]:
+                    for item in ccobj.mosyms:
                         for key, val in irrep_correspondence.items():
                             if item == key:
                                 file.write(str(val)+" ")
@@ -682,8 +681,6 @@ def write_champ_v2_det(ccobj, outputdest=None):
 
                 if ccobj.scftype in ["RHF", "UHF", "ROHF"]:
 
-                    file.write(f"&electrons  nelec {ccobj.number_alpha_valence+ccobj.number_beta_valence} nup {ccobj.number_alpha_valence} \n" )
-                    file.write(f"\n" )
                     file.write(f"determinants {1} {1} \n")
                     file.write(f"      {1:.6f} \n")
 

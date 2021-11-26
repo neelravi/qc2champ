@@ -902,8 +902,10 @@ class Molcas(logfileparser.Logfile):
 
                 homos = 0
                 num_irrep =  self.symm_info["symmetry_count"]
+                print ("self nbasis", self.nbasis)
                 mocoeffs_per_irrep = [[] for i in range(num_irrep)]
                 moenergies_per_irrep = [[] for i in range(num_irrep)]
+                mocoefficients = numpy.zeros(shape=(self.nbasis, self.nbasis))
                 # aonames_per_irrep = [[] for i in range(num_irrep)]
                 orbital_index_per_irrep = [[] for i in range(num_irrep)]
 
@@ -919,6 +921,7 @@ class Molcas(logfileparser.Logfile):
 
                     if line.strip().startswith('Orbital'):
                         orbital_index_per_irrep[irrep].extend(line.split()[1:])
+                        print ("orbitals ", orbital_index_per_irrep[irrep])
                         line = next(inputfile)
 
                     if line.strip().startswith('Energy'):
@@ -938,8 +941,8 @@ class Molcas(logfileparser.Logfile):
 
                     info = tokens[3:]
                     j = 0
-                    if tokens != []:
-                        mocoeffs_per_irrep[irrep].extend([ float(x) for x in tokens[3:]])
+                    # if tokens != []:
+                    mocoeffs_per_irrep[irrep].extend([ float(x) for x in tokens[3:]])
                     # self.set_attribute('aonames', aonames)
 
                 print ("mocoeffs per irrep ", mocoeffs_per_irrep[3])
@@ -961,6 +964,7 @@ class Molcas(logfileparser.Logfile):
 
                         # self.append_attribute('mocoeffs', mocoeffs)
                 # print ("aonames ", aonames_per_irrep)         # uncomment later
+
 
         # This part is to read the symmetry species and basis functions per symmetry species. It is required by the
         # following block of AO/SO.
@@ -1029,6 +1033,7 @@ class Molcas(logfileparser.Logfile):
                         # symm_adapted_basis.append("{atom}_{orbital}".format(atom=tokens[1], orbital=tokens[2]))
                     line = next(inputfile)
             self.set_attribute('mosyms', self.mosyms)
+            print ("mo symms ", self.mosyms)
 
 
             line=next(inputfile)
