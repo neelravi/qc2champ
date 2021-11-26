@@ -1004,9 +1004,9 @@ class Molcas(logfileparser.Logfile):
 
                 homos = 0
                 num_irrep =  self.symm_info["symmetry_count"]
+                basis_per_irrep =  self.symm_info["basis_per_irrep"]
                 mocoeffs_per_irrep = [[] for i in range(num_irrep)]
                 moenergies_per_irrep = [[] for i in range(num_irrep)]
-                mocoefficients = numpy.zeros(shape=(self.nbasis, self.nbasis))
                 # aonames_per_irrep = [[] for i in range(num_irrep)]
                 orbital_index_per_irrep = [[] for i in range(num_irrep)]
 
@@ -1022,7 +1022,6 @@ class Molcas(logfileparser.Logfile):
 
                     if line.strip().startswith('Orbital'):
                         orbital_index_per_irrep[irrep].extend(line.split()[1:])
-                        print ("orbitals ", orbital_index_per_irrep[irrep])
                         line = next(inputfile)
 
                     if line.strip().startswith('Energy'):
@@ -1043,8 +1042,9 @@ class Molcas(logfileparser.Logfile):
                     info = tokens[3:]
                     j = 0
                     mocoeffs_per_irrep[irrep].extend([ float(x) for x in tokens[3:]])
+                    print ( [float(x) for x in tokens[3:]])
                     # self.set_attribute('aonames', aonames)
-
+                print("orbitals ", [len(i) for i in orbital_index_per_irrep])
                 print ("mocoeffs per irrep ", mocoeffs_per_irrep[3])
 
 
