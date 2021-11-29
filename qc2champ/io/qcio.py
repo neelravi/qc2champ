@@ -610,6 +610,11 @@ def write_champ_v2_geometry(ccobj, outputdest=None):
     trexio.write_nucleus_coord(trexio_file, bohr_coords)
     trexio.write_nucleus_charge(trexio_file, ccobj.atomnos)
 
+    pt = PeriodicTable()
+    element_list = [pt.element[Z] for Z in ccobj.atomnos]
+
+    trexio.write_nucleus_label(trexio_file, element_list)
+
     if outputdest is not None:
         if isinstance(outputdest, str):
             ## Write down a symmetry file in old champ format
@@ -622,8 +627,6 @@ def write_champ_v2_geometry(ccobj, outputdest=None):
                 coords = [[ccobj.atomcoords[0][i][j] for j in range(3)] for i in range(len(ccobj.atomnos))]
                 coords = np.array(coords)/0.5291772109 #angstrom_to_bohr conversion
 
-                pt = PeriodicTable()
-                element_list = [pt.element[Z] for Z in ccobj.atomnos]
                 for element in range(len(ccobj.atomnos)):
                    file.write("{} {: 0.8f} {: 0.8f} {: 0.8f} \n".format(element_list[element], coords[element][0], coords[element][1], coords[element][2]))
 
