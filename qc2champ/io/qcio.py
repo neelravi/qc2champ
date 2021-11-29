@@ -18,7 +18,7 @@ from urllib.request import urlopen
 from urllib.error import URLError
 
 from cclib.parser import data
-from cclib.parser.utils import find_package
+from cclib.parser.utils import find_package, convertor
 
 from cclib.parser.adfparser import ADF
 from cclib.parser.daltonparser import DALTON
@@ -585,10 +585,47 @@ def write_champ_v2_sym(ccobj, outputdest=None):
     else:
         return None
 
+def write_trexio(ccobj, outputdest=None):
+    """Writes the parsed information from the quantum
+    chemistry calculation to trexio hdf5 file.
+
+    Inputs:
+        ccobj - Either a job (from ccopen) or a data (from job.parse()) object
+        outputdest - A filename or file object for writing. Example, "rhf.geo", "cn3.geo"
+
+    Returns:
+        None as a function value
+    """
+
+    # If the output filename is mentioned, then write to that file
+    # This will write in the new format that CHAMP recognizes.
+
+    ## trexio part
+    if outputdest is not None:
+        if isinstance(outputdest, str):
+            trexio_file = trexio.File(outputdest + ".hdf5", mode='w', back_end=trexio.TREXIO_HDF5)
+            trexio.write_nucleus_num(trexio_file, ccobj.natom)
+            trexio.write_nucleus_coord(trexio_file, convertor(ccobj.atomcoords.flatten(), "Angstrom", "bohr"))
+            trexio.write_nucleus_charge(trexio_file, ccobj.atomnos)
+
+            pt = PeriodicTable()
+            element_list = [pt.element[Z] for Z in ccobj.atomnos]
+
+            trexio.write_nucleus_label(trexio_file, element_list)
+
+        else:
+            raise ValueError
+    # If outputdest is None, return a string representation of the output.
+    else:
+        return None
+
+
+
+
 
 def write_champ_v2_geometry(ccobj, outputdest=None):
     """Writes the parsed geometry data from the quantum
-    chemistry calculation to old format of champ .geo  file.
+    chemistry calculation to new format of champ .geo  file.
 
     Inputs:
         ccobj - Either a job (from ccopen) or a data (from job.parse()) object
@@ -602,23 +639,13 @@ def write_champ_v2_geometry(ccobj, outputdest=None):
     # If the output filename is mentioned, then write to that file
     # This will write in the old format that CHAMP recognizes.
 
-    ## trexio part
-    trexio_file = trexio.File("trexio_output.hdf5", mode='w', back_end=trexio.TREXIO_HDF5)
-    ang2Bohr = 1.8897261245
-    trexio.write_nucleus_num(trexio_file, ccobj.natom)
-    bohr_coords = ccobj.atomcoords.flatten()*ang2Bohr
-    trexio.write_nucleus_coord(trexio_file, bohr_coords)
-    trexio.write_nucleus_charge(trexio_file, ccobj.atomnos)
-
-    pt = PeriodicTable()
-    element_list = [pt.element[Z] for Z in ccobj.atomnos]
-
-    trexio.write_nucleus_label(trexio_file, element_list)
-
     if outputdest is not None:
         if isinstance(outputdest, str):
             ## Write down a symmetry file in old champ format
             with open(outputdest + ".xyz", 'w') as file:
+
+                pt = PeriodicTable()
+                element_list = [pt.element[Z] for Z in ccobj.atomnos]
 
                 # header line printed below
                 file.write(str(ccobj.natom) + "\n" )
@@ -633,9 +660,6 @@ def write_champ_v2_geometry(ccobj, outputdest=None):
 
 
             file.close()
-
-        elif isinstance(outputdest, io.IOBase):
-            outputdest.write(output)
         else:
             raise ValueError
     # If outputdest is None, return a string representation of the output.

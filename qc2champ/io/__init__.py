@@ -13,4 +13,6 @@ from qc2champ.io.qcio import write_champ_v2_sym
 from qc2champ.io.qcio import write_champ_v2_geometry
 from qc2champ.io.qcio import write_champ_v2_lcao
 from qc2champ.io.qcio import write_champ_v2_det
+
+from qc2champ.io.qcio import write_trexio
 from cclib.io.ccio import URL_PATTERN

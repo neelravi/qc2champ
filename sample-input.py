@@ -29,6 +29,10 @@ for filename in [sys.argv[1]]:
     qc2champ.io.ccwrite(data, outputtype="xyz", outputdest="output.xyz")
     qc2champ.io.write_champ_v2_sym(data, outputdest="MOLCAS_" + basename)
     qc2champ.io.write_champ_v2_geometry(data, outputdest="MOLCAS_" + basename)
+
+    ## TREXIO All in One
+    qc2champ.io.write_trexio(data, outputdest="MOLCAS_" + basename)
+
     # qc2champ.io.write_champ_v2_lcao(data, outputdest="CN3_" + basename)
     # qc2champ.io.write_champ_v2_det(data, outputdest="CN3_" + basename)
 
