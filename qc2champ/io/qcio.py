@@ -603,12 +603,12 @@ def write_champ_v2_geometry(ccobj, outputdest=None):
     # This will write in the old format that CHAMP recognizes.
 
     ## trexio part
-    trexio_file = trexio.File("trexio_output.hdf5", mode='w')
+    trexio_file = trexio.File("trexio_output.hdf5", mode='w', back_end=trexio.TREXIO_HDF5)
     ang2Bohr = 1.8897261245
     trexio.write_nucleus_num(trexio_file, ccobj.natom)
     bohr_coords = ccobj.atomcoords.flatten()*ang2Bohr
     trexio.write_nucleus_coord(trexio_file, bohr_coords)
-
+    trexio.write_nucleus_charge(trexio_file, ccobj.atomnos)
 
     if outputdest is not None:
         if isinstance(outputdest, str):
