@@ -45,6 +45,19 @@ from cclib.io import wfxwriter
 from cclib.io import xyzreader
 from cclib.io import xyzwriter
 
+try:
+    import trexio
+except:
+    print("Error: The TREXIO Python library is not installed")
+    sys.exit(1)
+
+try:
+    from resultsFile import getFile, a0
+except:
+    print("Error: The resultsFile Python library is not installed")
+    sys.exit(1)
+
+
 _has_cclib2openbabel = find_package("openbabel")
 if _has_cclib2openbabel:
     from cclib.bridge import cclib2openbabel
@@ -588,6 +601,13 @@ def write_champ_v2_geometry(ccobj, outputdest=None):
 
     # If the output filename is mentioned, then write to that file
     # This will write in the old format that CHAMP recognizes.
+
+    ## trexio part
+    trexio_file = trexio.File("trexio_output.hdf5", mode='w')
+    ang2Bohr = 1.8897261245
+    trexio.write_nucleus_num(trexio_file, ccobj.natom)
+    bohr_coords = ccobj.atomcoords.flatten()*ang2Bohr
+    trexio.write_nucleus_coord(trexio_file, bohr_coords)
 
 
     if outputdest is not None:
