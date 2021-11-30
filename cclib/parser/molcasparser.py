@@ -1350,7 +1350,7 @@ class Molcas(logfileparser.Logfile):
 
                 line = next(inputfile)
 
-            # self.set_attribute('ci', self.ci)
+            self.set_attribute('ci', self.ci)
 
         #       ************************************************************************************************************************
         #                                                       Wave function printout:
@@ -1433,4 +1433,4 @@ class Molcas(logfileparser.Logfile):
             self.ci["CSF_Occupations"] = csf_occupations
             self.ci["CSF_Coefficients"] = csf_coeff
             self.set_attribute('ci', self.ci)
-            # print (self.ci["CSF_Coefficients"])
+            print (self.ci["CSF_Coefficients"])

@@ -669,7 +669,7 @@ def write_champ_v2_geometry(ccobj, outputdest=None):
 
 def write_champ_v2_lcao(ccobj, outputdest=None):
     """Writes the parsed geometry data from the quantum
-    chemistry calculation to old format of champ .lcao  file.
+    chemistry calculation to the new format of champ .lcao  file.
 
     Inputs:
         ccobj - Either a job (from ccopen) or a data (from job.parse()) object
@@ -696,8 +696,6 @@ def write_champ_v2_lcao(ccobj, outputdest=None):
                 file.write("end\n")
             file.close()
 
-        elif isinstance(outputdest, io.IOBase):
-            outputdest.write(output)
         else:
             raise ValueError
     # If outputdest is None, return a string representation of the output.
@@ -707,7 +705,7 @@ def write_champ_v2_lcao(ccobj, outputdest=None):
 
 def write_champ_v2_det(ccobj, outputdest=None):
     """Writes the parsed determinants data from the quantum
-    chemistry calculation to old format of champ .det file.
+    chemistry calculation to the new format of champ .det file.
 
     Inputs:
         ccobj - Either a job (from ccopen) or a data (from job.parse()) object
@@ -726,24 +724,22 @@ def write_champ_v2_det(ccobj, outputdest=None):
             ## Write down a symmetry file in old champ format
             with open(outputdest + ".det", 'w') as file:
 
-                if ccobj.scftype in ["RHF", "UHF", "ROHF"]:
+                # if ccobj.scftype in ["RHF", "UHF", "ROHF"]:
 
-                    file.write(f"determinants {1} {1} \n")
-                    file.write(f"      {1:.6f} \n")
+                file.write(f"determinants {1} {1} \n")
+                file.write(f"      {1:.6f} \n")
+                file.write(str(ccobj.ci))
+                # alpha_occupation = np.arange(ccobj.number_alpha_valence) + 1
+                # beta_occupation  = np.arange(ccobj.number_alpha_valence) + 1
+                # np.savetxt(file, np.row_stack((alpha_occupation, beta_occupation)), fmt='  %i', delimiter='  ', newline='')
 
-                    alpha_occupation = np.arange(ccobj.number_alpha_valence) + 1
-                    beta_occupation  = np.arange(ccobj.number_alpha_valence) + 1
-                    np.savetxt(file, np.row_stack((alpha_occupation, beta_occupation)), fmt='  %i', delimiter='  ', newline='')
+                file.write("\n")
+                file.write("end\n")
+                file.close()
 
-                    file.write("\n")
-                    file.write("end\n")
-                    file.close()
+                # elif ccobj.scftype in ["MCSCF"]:
+                #     raise Warning("being implemented")
 
-                elif ccobj.scftype in ["MCSCF"]:
-                    raise Warning("being implemented")
-
-        elif isinstance(outputdest, io.IOBase):
-            outputdest.write(output)
         else:
             raise ValueError
     # If outputdest is None, return a string representation of the output.
