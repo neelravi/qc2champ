@@ -1335,12 +1335,12 @@ class Molcas(logfileparser.Logfile):
                     except:
                         self.logger.warning('Number of root(s) required label is missing!')
                         self.ci["Number of root(s) required"]
-                if 'CI roots used' in line:
+                if 'CI root' in line:
                     try:
-                        self.ci["CI roots used"] = line.split()[3:]
+                        self.ci["CI root"] = line.split()[3:]
                     except:
                         self.logger.warning('CI roots used label is missing!')
-                        self.ci["CI roots used"] = []
+                        self.ci["CI root"] = []
                 if 'weights' in line:
                     try:
                         self.ci["weights"] = line.split()[1:]
@@ -1349,8 +1349,7 @@ class Molcas(logfileparser.Logfile):
                         self.ci["weights"] = []
 
                 line = next(inputfile)
-
-            # self.set_attribute('ci', self.ci)
+            self.set_attribute('ci', self.ci)
 
         #       ************************************************************************************************************************
         #                                                       Wave function printout:
@@ -1400,37 +1399,39 @@ class Molcas(logfileparser.Logfile):
                     print (line)
                     try:
                         ci_energy[root_number-1] = line.split()[1]
-                        print ("ci energy ", ci_energy[root_number-1])
                     except:
                         self.logger.warning('ci energy label is missing!')
                         ci_energy[root_number-1] = 0.0
 
                 if 'conf/sym' in line:
                     line = next(inputfile)
+                # if len(line.split()) == 5:
+                    print ("line", line)
+                    for i in range(number_of_csfs):
+                        print ("csf number ", i)
+                        icsf = int(line.split()[0])
+                        csf_occupations[root_number-1,icsf-1]  = line.split()[1]
+                        csf_coeff[root_number-1,icsf-1] = line.split()[3]
+                        print ("local lines ", csf_coeff[root_number-1,icsf-1], csf_occupations[root_number-1,icsf-1])
+                        line = next(inputfile)
 
-                if len(line.split()) == 4:
-                    icsf = int(line.split()[0])
-                    csf_occupations[root_number-1,icsf-1]  = line.split()[1]
-                    csf_coeff[root_number-1,icsf-1] = line.split()[2]
-                    line = next(inputfile)
+                    # if "sqrt" in line:
+                    #     ci_occupations[root_number-1] = numpy.append( ci_occupations[root_number-1], line.split()[4])
+                    #     # Read the phase factor + or -
+                    #     if line.split()[0] == "-":
+                    #         coeff = -numpy.sqrt(float(Fraction(line.split()[2])))
+                    #     else:
+                    #         coeff = numpy.sqrt(float(Fraction(line.split()[2])))
 
-                if "sqrt" in line:
-                    ci_occupations[root_number-1] = numpy.append( ci_occupations[root_number-1], line.split()[4])
-                    # Read the phase factor + or -
-                    if line.split()[0] == "-":
-                        coeff = -numpy.sqrt(float(Fraction(line.split()[2])))
-                    else:
-                        coeff = numpy.sqrt(float(Fraction(line.split()[2])))
-
-                    ci_coeff[root_number-1]       = numpy.append( ci_coeff[root_number-1], coeff)
-
+                    #     ci_coeff[root_number-1]       = numpy.append( ci_coeff[root_number-1], coeff)
+                    #     line = next(inputfile)
 
                 line = next(inputfile)
-            print ("ci energy ", ci_energy)
             self.ci["CI_Energy"] = ci_energy
             self.ci["CI_Occupations"] = ci_occupations
             self.ci["CI_Coefficients"] = ci_coeff
             self.ci["CSF_Occupations"] = csf_occupations
             self.ci["CSF_Coefficients"] = csf_coeff
             self.set_attribute('ci', self.ci)
-            print ("coeffs ", csf_coeff, self.ci["CSF_Coefficients"])
+            self.ci["CSF_Coefficients"] = csf_coeff
+            print ("from the parser csf coeff and occup ", csf_coeff,  csf_occupations)
