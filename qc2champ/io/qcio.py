@@ -728,7 +728,7 @@ def write_champ_v2_det(ccobj, outputdest=None):
 
                 file.write(f"determinants {1} {1} \n")
                 file.write(f"      {1:.6f} \n")
-                file.write(str(ccobj.ci))
+                # file.write(str(ccobj.ci["CI_Energy"]))
                 # alpha_occupation = np.arange(ccobj.number_alpha_valence) + 1
                 # beta_occupation  = np.arange(ccobj.number_alpha_valence) + 1
                 # np.savetxt(file, np.row_stack((alpha_occupation, beta_occupation)), fmt='  %i', delimiter='  ', newline='')
