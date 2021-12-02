@@ -1405,26 +1405,36 @@ class Molcas(logfileparser.Logfile):
 
                 if 'conf/sym' in line:
                     line = next(inputfile)
+                    icsf = 1
                 # if len(line.split()) == 5:
                     print ("line", line)
-                    for i in range(number_of_csfs):
-                        print ("csf number ", i)
-                        icsf = int(line.split()[0])
-                        csf_occupations[root_number-1,icsf-1]  = line.split()[1]
-                        csf_coeff[root_number-1,icsf-1] = line.split()[3]
-                        print ("local lines ", csf_coeff[root_number-1,icsf-1], csf_occupations[root_number-1,icsf-1])
-                        line = next(inputfile)
+                    while icsf < number_of_csfs:
+                    # for i in range(number_of_csfs):
+                    # print ("csf number ", i)
+                        while 'sqrt' not in line:
+                            # line = next(inputfile)
+                            print ("line afte first while", line)
+                            icsf = int(line.split()[0])
+                            csf_occupations[root_number-1,icsf-1]  = line.split()[1]
+                            csf_coeff[root_number-1,icsf-1] = line.split()[3]
+                            print ("local lines ", csf_coeff[root_number-1,icsf-1], csf_occupations[root_number-1,icsf-1])
 
-                    # if "sqrt" in line:
-                    #     ci_occupations[root_number-1] = numpy.append( ci_occupations[root_number-1], line.split()[4])
-                    #     # Read the phase factor + or -
-                    #     if line.split()[0] == "-":
-                    #         coeff = -numpy.sqrt(float(Fraction(line.split()[2])))
-                    #     else:
-                    #         coeff = numpy.sqrt(float(Fraction(line.split()[2])))
+                            # self.skip_lines(inputfile, 'b')
+                            # print ("line before ", line)
+                            line = next(inputfile)
+                        while 'sqrt' in line:
+                        # if "sqrt" in line:
+                            print ("line in sqrt", line)
+                            ci_occupations[root_number-1] = numpy.append( ci_occupations[root_number-1], line.split()[4])
+                            # Read the phase factor + or -
+                            if line.split()[0] == "-":
+                                coeff = -numpy.sqrt(float(Fraction(line.split()[2])))
+                            else:
+                                coeff = numpy.sqrt(float(Fraction(line.split()[2])))
 
-                    #     ci_coeff[root_number-1]       = numpy.append( ci_coeff[root_number-1], coeff)
-                    #     line = next(inputfile)
+                            ci_coeff[root_number-1]       = numpy.append( ci_coeff[root_number-1], coeff)
+                            print ("ci_coeffs", ci_coeff[root_number-1])
+                            line = next(inputfile)
 
                 line = next(inputfile)
             self.ci["CI_Energy"] = ci_energy
