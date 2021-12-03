@@ -722,7 +722,8 @@ def write_champ_v2_det(ccobj, outputdest=None):
     number_of_roots = int(ccobj.ci["Number of root(s) required"])
     number_of_determinants = int(ccobj.ci["Number of determinants"])
     number_of_csfs = int(ccobj.ci["Number of CSFs"])
-    # number_of_mappings = int(ccobj.ci["CSF_Mappings"])
+    number_of_mappings = int(ccobj.ci["CSF_Mappings"])
+
 
     if outputdest is not None:
         if isinstance(outputdest, str):
@@ -750,7 +751,7 @@ def write_champ_v2_det(ccobj, outputdest=None):
 
                 # CSFMAP section
                 file.write(f"csfmap  \n")
-                file.write(f"{number_of_csfs} {number_of_determinants} {1} \n")
+                file.write(f"{number_of_csfs} {number_of_determinants} {number_of_mappings} \n")
                 file.write(f"      {1:.6f} \n")
 
                 # np.savetxt(file, np.row_stack((alpha_occupation, beta_occupation)), fmt='  %i', delimiter='  ', newline='')

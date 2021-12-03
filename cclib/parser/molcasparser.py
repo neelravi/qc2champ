@@ -1313,9 +1313,10 @@ class Molcas(logfileparser.Logfile):
         #       Root passed to geometry opt.               3
         # --
 
-
         if '++    CI expansion specifications:' in line:
-            self.ci = {}
+            # Read the first instance of the CI expansion specifications line only
+            if not hasattr(self, 'ci'):
+                self.ci = {}
             while line[:2] != '--':
                 if 'Number of CSFs' in line:
                     try:
@@ -1334,7 +1335,13 @@ class Molcas(logfileparser.Logfile):
                         self.ci["Number of root(s) required"] = line.split()[4]
                     except:
                         self.logger.warning('Number of root(s) required label is missing!')
-                        self.ci["Number of root(s) required"]
+                        self.ci["Number of root(s) required"] = ""
+                if 'Root chosen for geometry opt' in line:
+                    try:
+                        self.ci["Root chosen for geometry opt"] = line.split()[5]
+                    except:
+                        self.logger.warning('Root chosen for geometry opt label is missing!')
+                        self.ci["Root chosen for geometry opt"] = ""
                 if 'CI root' in line:
                     try:
                         self.ci["CI root"] = line.split()[3:]
@@ -1349,7 +1356,7 @@ class Molcas(logfileparser.Logfile):
                         self.ci["weights"] = []
 
                 line = next(inputfile)
-            # self.set_attribute('ci', self.ci)
+
 
         #       ************************************************************************************************************************
         #                                                       Wave function printout:
@@ -1421,6 +1428,7 @@ class Molcas(logfileparser.Logfile):
 
                             ci_coeff[root_number-1]       = numpy.append( ci_coeff[root_number-1], coeff)
                             csfmap_counter += 1
+                            self.ci["CSF_Mappings"] = csfmap_counter
                             line = next(inputfile)
                         elif not line.strip():
                             line = next(inputfile)
@@ -1432,8 +1440,6 @@ class Molcas(logfileparser.Logfile):
                             csf_coeff[root_number-1,icsf-1] = line.split()[3]
                             line = next(inputfile)
                 line = next(inputfile)
-            print ("CSF mappings ", csfmap_counter)
-            print ("from the parser csf coeff and occup ", csf_coeff,  csf_occupations)
             self.ci["CSF_Mappings"] = csfmap_counter
             self.ci["CI_Energy"] = ci_energy
             self.ci["CI_Occupations"] = ci_occupations
