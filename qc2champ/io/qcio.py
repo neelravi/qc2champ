@@ -751,6 +751,8 @@ def write_champ_v2_det(ccobj, outputdest=None):
     number_of_mappings = int(ccobj.ci["CSF_Mappings"])
 
     print ("length of ci_coeffs", ccobj.ci['CI_Coefficients'][1].shape)
+    print ("length of dets per csf ", ccobj.ci['Dets_Per_CSF'][0][2439])
+    print ("length of dets per csf ", ccobj.ci['Dets_Per_CSF'][1][2439])
 
     if outputdest is not None:
         if isinstance(outputdest, str):
@@ -776,6 +778,8 @@ def write_champ_v2_det(ccobj, outputdest=None):
                 # CSFMAP section
                 file.write(f"csfmap  \n")
                 file.write(f"{number_of_csfs} {number_of_determinants} {number_of_mappings} \n")
+                for root in range(number_of_roots):
+                    np.savetxt(file, ccobj.ci['Dets_Per_CSF'][root], fmt='%d', delimiter='  ', newline=' ')
                 file.write(f"      {1:.6f} \n")
 
                 # np.savetxt(file, np.row_stack((alpha_occupation, beta_occupation)), fmt='  %i', delimiter='  ', newline='')

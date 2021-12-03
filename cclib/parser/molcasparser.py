@@ -1045,7 +1045,7 @@ class Molcas(logfileparser.Logfile):
                     print ( [float(x) for x in tokens[3:]])
                     # self.set_attribute('aonames', aonames)
                 print("orbitals ", [len(i) for i in orbital_index_per_irrep])
-                print ("mocoeffs per irrep ", mocoeffs_per_irrep[3])
+                # print ("mocoeffs per irrep ", mocoeffs_per_irrep[3])
 
 
 
@@ -1389,10 +1389,12 @@ class Molcas(logfileparser.Logfile):
 
             ci_energy = numpy.ndarray(shape=(number_of_roots), dtype=float)
             csf_coeff = numpy.ndarray(shape=(number_of_roots, number_of_csfs), dtype=float)
+            dets_per_csf = numpy.ndarray(shape=(number_of_roots, number_of_csfs), dtype=int)
             csf_occupations = numpy.ndarray(shape=(number_of_roots, number_of_csfs), dtype=object)
             ci_occupations = [numpy.array([],dtype=object) for i in range(number_of_roots)]
             ci_coeff       = [numpy.array([],dtype=object) for i in range(number_of_roots)]
 
+            # dets_per_csf = 0
             while line[6:54] != 'Natural orbitals and occupation numbers for root':
 
                 if 'printout of CI-coefficients larger than' in line:
@@ -1414,11 +1416,13 @@ class Molcas(logfileparser.Logfile):
                 if 'conf/sym' in line:
                     line = next(inputfile)
 
-                    icsf_counter = 0; csfmap_counter = 0
+                    icsf_counter = 0; csfmap_counter = 0; det_per_csf_counter = 0
                     while icsf_counter < number_of_csfs:
 
                         if "sqrt" in line:
-                            print ("CSF:: ", icsf_counter, line)
+                            # print ("CSF:: ", icsf_counter, line)
+                            # print ("initial icsf_counter", icsf_counter, icsf)
+                            dets_per_csf[root_number-1,icsf-1] += 1
                             ci_occupations[root_number-1] = numpy.append( ci_occupations[root_number-1], line.split()[4])
                             # Read the phase factor + or -
                             if line.split()[0] == "-":
@@ -1434,7 +1438,7 @@ class Molcas(logfileparser.Logfile):
                         else:
                             icsf_counter += 1
                             icsf = int(line.split()[0])
-                            print ("CI::            ", icsf_counter, line)
+                            # print ("CI::            ", icsf_counter, line)
                             csf_occupations[root_number-1,icsf-1]  = line.split()[1]
                             csf_coeff[root_number-1,icsf-1] = line.split()[3]
                             line = next(inputfile)
@@ -1444,6 +1448,8 @@ class Molcas(logfileparser.Logfile):
             # Replace the occupation strings with champ formatted numbers
             ci_occupations = numpy.vectorize(utils.molcas_occup_strings_to_numbers)(ci_occupations)
             #
+            print ("dets per csf ", dets_per_csf)
+            self.ci["Dets_Per_CSF"] = dets_per_csf
             self.ci["CI_Occupations"] = ci_occupations
             self.ci["CI_Coefficients"] = ci_coeff
             self.ci["CSF_Occupations"] = csf_occupations
