@@ -1349,7 +1349,7 @@ class Molcas(logfileparser.Logfile):
                         self.ci["weights"] = []
 
                 line = next(inputfile)
-            self.set_attribute('ci', self.ci)
+            # self.set_attribute('ci', self.ci)
 
         #       ************************************************************************************************************************
         #                                                       Wave function printout:
@@ -1407,7 +1407,7 @@ class Molcas(logfileparser.Logfile):
                 if 'conf/sym' in line:
                     line = next(inputfile)
 
-                    icsf_counter = 0
+                    icsf_counter = 0; csfmap_counter = 0
                     while icsf_counter < number_of_csfs:
 
                         if "sqrt" in line:
@@ -1420,6 +1420,7 @@ class Molcas(logfileparser.Logfile):
                                 coeff = numpy.sqrt(float(Fraction(line.split()[2])))
 
                             ci_coeff[root_number-1]       = numpy.append( ci_coeff[root_number-1], coeff)
+                            csfmap_counter += 1
                             line = next(inputfile)
                         elif not line.strip():
                             line = next(inputfile)
@@ -1431,12 +1432,14 @@ class Molcas(logfileparser.Logfile):
                             csf_coeff[root_number-1,icsf-1] = line.split()[3]
                             line = next(inputfile)
                 line = next(inputfile)
+            print ("CSF mappings ", csfmap_counter)
             print ("from the parser csf coeff and occup ", csf_coeff,  csf_occupations)
+            self.ci["CSF_Mappings"] = csfmap_counter
             self.ci["CI_Energy"] = ci_energy
             self.ci["CI_Occupations"] = ci_occupations
             self.ci["CI_Coefficients"] = ci_coeff
             self.ci["CSF_Occupations"] = csf_occupations
             self.ci["CSF_Coefficients"] = csf_coeff
             self.set_attribute('ci', self.ci)
-            self.ci["CSF_Coefficients"] = csf_coeff
+
 

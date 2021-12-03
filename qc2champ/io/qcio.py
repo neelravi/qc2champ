@@ -719,6 +719,11 @@ def write_champ_v2_det(ccobj, outputdest=None):
     # This will write in the old format that CHAMP recognizes.
     print ("from determinant file :: ", ccobj.ci)
 
+    number_of_roots = int(ccobj.ci["Number of root(s) required"])
+    number_of_determinants = int(ccobj.ci["Number of determinants"])
+    number_of_csfs = int(ccobj.ci["Number of CSFs"])
+    # number_of_mappings = int(ccobj.ci["CSF_Mappings"])
+
     if outputdest is not None:
         if isinstance(outputdest, str):
             ## Write down a symmetry file in old champ format
@@ -726,6 +731,7 @@ def write_champ_v2_det(ccobj, outputdest=None):
 
                 # if ccobj.scftype in ["RHF", "UHF", "ROHF"]:
 
+                # DETERMINANTS section
                 file.write(f"determinants {1} {1} \n")
                 file.write(f"      {1:.6f} \n")
                 # alpha_occupation = np.arange(ccobj.number_alpha_valence) + 1
@@ -734,6 +740,24 @@ def write_champ_v2_det(ccobj, outputdest=None):
 
                 file.write("\n")
                 file.write("end\n")
+
+                # CSF section
+                file.write(f"csf {number_of_csfs} {number_of_roots} \n")
+                file.write(f"      {1:.6f} \n")
+
+                file.write("\n")
+                file.write("end\n")
+
+                # CSFMAP section
+                file.write(f"csfmap  \n")
+                file.write(f"{number_of_csfs} {number_of_determinants} {1} \n")
+                file.write(f"      {1:.6f} \n")
+
+                # np.savetxt(file, np.row_stack((alpha_occupation, beta_occupation)), fmt='  %i', delimiter='  ', newline='')
+
+                file.write("\n")
+                file.write("end\n")
+
                 file.close()
 
                 # elif ccobj.scftype in ["MCSCF"]:
