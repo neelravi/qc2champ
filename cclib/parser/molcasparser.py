@@ -1408,12 +1408,11 @@ class Molcas(logfileparser.Logfile):
 
                     icsf = 1
                     while icsf <= number_of_csfs:
-
                         if "Natural orbitals and occupation numbers for root" in line:
                             break
 
                         if "sqrt" in line:
-                            print ("line in sqrt", line)
+                            print ("CSF:: ", icsf, line)
                             ci_occupations[root_number-1] = numpy.append( ci_occupations[root_number-1], line.split()[4])
                             # Read the phase factor + or -
                             if line.split()[0] == "-":
@@ -1423,16 +1422,16 @@ class Molcas(logfileparser.Logfile):
 
                             ci_coeff[root_number-1]       = numpy.append( ci_coeff[root_number-1], coeff)
                             line = next(inputfile)
-                        elif not line:
-                            print ("csf number ", icsf)
-                            print ("lines inside sqrt not in line", line)
-                            print ("is sqrt in line ", 'sqrt' in line)
+                        elif not line.strip():
+                            line = next(inputfile)
+                        else:
+                            print ("CI::            ", icsf, line)
                             icsf = int(line.split()[0])
                             csf_occupations[root_number-1,icsf-1]  = line.split()[1]
                             csf_coeff[root_number-1,icsf-1] = line.split()[3]
                             line = next(inputfile)
-                        line = next(inputfile)
                 line = next(inputfile)
+            print ("from the parser csf coeff and occup ", csf_coeff,  csf_occupations)
             self.ci["CI_Energy"] = ci_energy
             self.ci["CI_Occupations"] = ci_occupations
             self.ci["CI_Coefficients"] = ci_coeff
@@ -1440,4 +1439,4 @@ class Molcas(logfileparser.Logfile):
             self.ci["CSF_Coefficients"] = csf_coeff
             self.set_attribute('ci', self.ci)
             self.ci["CSF_Coefficients"] = csf_coeff
-            print ("from the parser csf coeff and occup ", csf_coeff,  csf_occupations)
+
