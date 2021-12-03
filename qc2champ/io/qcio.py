@@ -717,7 +717,7 @@ def write_champ_v2_det(ccobj, outputdest=None):
 
     # If the output filename is mentioned, then write to that file
     # This will write in the old format that CHAMP recognizes.
-    print ("from determinant file :: ", ccobj.ci)
+
 
     number_of_roots = int(ccobj.ci["Number of root(s) required"])
     number_of_determinants = int(ccobj.ci["Number of determinants"])
@@ -744,8 +744,8 @@ def write_champ_v2_det(ccobj, outputdest=None):
 
                 # CSF section
                 file.write(f"csf {number_of_csfs} {number_of_roots} \n")
-                file.write(f"      {1:.6f} \n")
-
+                for root in range(number_of_roots):
+                    np.savetxt(file, ccobj.ci['CSF_Coefficients'][root], fmt='%1.6f', delimiter='  ', newline=' ')
                 file.write("\n")
                 file.write("end\n")
 
