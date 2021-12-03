@@ -702,6 +702,32 @@ def write_champ_v2_lcao(ccobj, outputdest=None):
     else:
         return None
 
+def occup_strings_to_numbers(occup):
+    """Converts the strings of occupations to string of alpha and beta occupations in numbers.
+
+    Inputs:
+        numpy array of occupations
+
+    Returns:
+        None as a string of numbers
+    """
+
+    occ_string = ""
+    print ("original string ", occup)
+    for key, val in enumerate(occup):
+        print ("original chars in string ", key, val)
+        #occ_string += str(i) + " "
+        occup_alpha = occup.replace('a', '1').replace('2', '1')
+        occup_beta =  occup.replace('b', '1').replace('2', '1')
+    print ("occup alpha ", occup_alpha)
+    return occ_string
+
+
+
+
+
+
+
 
 def write_champ_v2_det(ccobj, outputdest=None):
     """Writes the parsed determinants data from the quantum
@@ -724,6 +750,7 @@ def write_champ_v2_det(ccobj, outputdest=None):
     number_of_csfs = int(ccobj.ci["Number of CSFs"])
     number_of_mappings = int(ccobj.ci["CSF_Mappings"])
 
+    print ("length of ci_coeffs", ccobj.ci['CI_Coefficients'][1].shape)
 
     if outputdest is not None:
         if isinstance(outputdest, str):
@@ -734,12 +761,9 @@ def write_champ_v2_det(ccobj, outputdest=None):
 
                 # DETERMINANTS section
                 file.write(f"determinants {1} {1} \n")
-                file.write(f"      {1:.6f} \n")
-                # alpha_occupation = np.arange(ccobj.number_alpha_valence) + 1
-                # beta_occupation  = np.arange(ccobj.number_alpha_valence) + 1
-                # np.savetxt(file, np.row_stack((alpha_occupation, beta_occupation)), fmt='  %i', delimiter='  ', newline='')
-
-                file.write("\n")
+                for root in range(number_of_roots):
+                    for csf in range(number_of_csfs):
+                        file.write(f"      {ccobj.ci['CI_Occupations'][root][csf]:s} \n")
                 file.write("end\n")
 
                 # CSF section

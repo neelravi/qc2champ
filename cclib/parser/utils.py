@@ -159,6 +159,36 @@ def _get_rmat_from_vecs(a, b):
     rmat = numpy.identity(3) + vx + numpy.matmul(vx, vx) * ((1-c)/s**2)
     return rmat
 
+def molcas_occup_strings_to_numbers(occup):
+    """Converts the strings of occupations to string of alpha and beta occupations in numbers.
+
+    @author Ravindra Shinde
+    @email  neelravi@gmail.com
+    @date   2021-01-03
+
+    Inputs:
+        numpy array of occupations
+
+    Returns:
+        None as a string of numbers
+    """
+
+    # Remove the "|" from the molcas occupation strings
+    occup = list(filter(lambda a: a != "|", occup))
+
+    occup_alpha= []; occup_beta= []
+    for pos, val in enumerate(occup):
+        occup_alpha.append(val.replace('2', str(pos + 1)).replace('a', str(pos + 1)).replace('b', '0'))
+        occup_beta.append(val.replace('2', str(pos + 1)).replace('b', str(pos + 1)).replace('a', '0'))
+
+    occup_alpha = list(filter(lambda a: a != "0", occup_alpha))
+    occup_beta = list(filter(lambda a: a != "0", occup_beta))
+    occup_alpha = ' '.join(occup_alpha)
+    occup_beta = ' '.join(occup_beta)
+    return occup_alpha + "  " + occup_beta
+
+
+
 def get_rotation(a, b):
     """Get rotation part for transforming a to b, where a and b are same positions with different orientations
     If one atom positions, i.e (1,3) shape array, are given, it returns identify transformation
@@ -221,7 +251,7 @@ class PeriodicTable:
     def __init__(self):
         self.element = [None]
         self.number = {}
-        
+
         for e in periodictable.elements:
             if e.symbol != 'n':
                 self.element.append(e.symbol)

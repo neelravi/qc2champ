@@ -1428,7 +1428,6 @@ class Molcas(logfileparser.Logfile):
 
                             ci_coeff[root_number-1]       = numpy.append( ci_coeff[root_number-1], coeff)
                             csfmap_counter += 1
-                            self.ci["CSF_Mappings"] = csfmap_counter
                             line = next(inputfile)
                         elif not line.strip():
                             line = next(inputfile)
@@ -1442,6 +1441,9 @@ class Molcas(logfileparser.Logfile):
                 line = next(inputfile)
             self.ci["CSF_Mappings"] = csfmap_counter
             self.ci["CI_Energy"] = ci_energy
+            # Replace the occupation strings with champ formatted numbers
+            ci_occupations = numpy.vectorize(utils.molcas_occup_strings_to_numbers)(ci_occupations)
+            #
             self.ci["CI_Occupations"] = ci_occupations
             self.ci["CI_Coefficients"] = ci_coeff
             self.ci["CSF_Occupations"] = csf_occupations
