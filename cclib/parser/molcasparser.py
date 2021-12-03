@@ -1377,6 +1377,7 @@ class Molcas(logfileparser.Logfile):
             from fractions import Fraction
             print ("in wavefunction printout ", self.ci)
             number_of_roots = int(self.ci["Number of root(s) required"])
+            number_of_determinants = int(self.ci["Number of determinants"])
             number_of_csfs = int(self.ci["Number of CSFs"])
 
             ci_energy = numpy.ndarray(shape=(number_of_roots), dtype=float)
@@ -1406,13 +1407,11 @@ class Molcas(logfileparser.Logfile):
                 if 'conf/sym' in line:
                     line = next(inputfile)
 
-                    icsf = 1
-                    while icsf <= number_of_csfs:
-                        if "Natural orbitals and occupation numbers for root" in line:
-                            break
+                    icsf_counter = 0
+                    while icsf_counter < number_of_csfs:
 
                         if "sqrt" in line:
-                            print ("CSF:: ", icsf, line)
+                            print ("CSF:: ", icsf_counter, line)
                             ci_occupations[root_number-1] = numpy.append( ci_occupations[root_number-1], line.split()[4])
                             # Read the phase factor + or -
                             if line.split()[0] == "-":
@@ -1425,8 +1424,9 @@ class Molcas(logfileparser.Logfile):
                         elif not line.strip():
                             line = next(inputfile)
                         else:
-                            print ("CI::            ", icsf, line)
+                            icsf_counter += 1
                             icsf = int(line.split()[0])
+                            print ("CI::            ", icsf_counter, line)
                             csf_occupations[root_number-1,icsf-1]  = line.split()[1]
                             csf_coeff[root_number-1,icsf-1] = line.split()[3]
                             line = next(inputfile)
