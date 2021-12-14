@@ -1043,7 +1043,7 @@ class Molcas(logfileparser.Logfile):
 
                     info = tokens[3:]
                     j = 0
-                    mocoeffs_per_irrep[irrep].extend([ float(x) for x in tokens[3:]])
+                    mocoeffs_per_irrep[irrep].append([ float(x) for x in tokens[3:]])
                     print ( [float(x) for x in tokens[3:]])
                     # self.set_attribute('aonames', aonames)
                 orbitals_per_irrep = [len(i) for i in orbital_index_per_irrep]
@@ -1060,10 +1060,71 @@ class Molcas(logfileparser.Logfile):
                     intermediate[ind] = uniquelist(intermediate[ind])
                     intermediate[ind] = list(map(int, intermediate[ind]))
 
+                print ("intermediate ", intermediate)
+                ## Convert the parsed mocoeffs data into an ordered arrays.
 
+                ### Step 1: Remove empty lists from the list of lists
+                for irrep in range(num_irrep):
+                    mocoeffs_per_irrep[irrep] = [ele for ele in mocoeffs_per_irrep[irrep] if ele != []]
+
+                ### Step 2: Get the basis set information
+                irreps = OrderedDict(Counter(self.mosyms).items())
+                basis_per_irrep = []
+                for _, bas in irreps.items():
+                    basis_per_irrep.append(bas)
+
+                print ("basis_per_irrep ", basis_per_irrep)
+
+                for irrep in range(1):
+                    # print ("intermediate ", intermediate[irrep])
+                    # print ([mocoeffs_per_irrep[irrep][0:bas] for bas in basis_per_irrep])
+                    array1 = ([mocoeffs_per_irrep[irrep][0:bas] for bas in basis_per_irrep])
+
+
+                # Number of splitted blocks of 10 orbitals per irrep
+                blocks = []
+                for blk in intermediate:
+                    blocks.append(len(blk))
+
+                print ("blocks ", blocks)
+
+                # rearrangement of lists
+                irrep = 0; temp=[]
+                for bind in range(blocks[irrep]):
+                    # print ( "RAW" , mocoeffs_per_irrep[irrep][bind:(bind+1)*basis_per_irrep[irrep]])
+                    temp.append(mocoeffs_per_irrep[irrep][bind:(bind+1)*basis_per_irrep[irrep]])
+
+                # print ("whole mocoeff ", temp[0][0],temp[0][1] )
+
+                irrep = 0
+                npmocoeff = numpy.empty([basis_per_irrep[irrep], orbitals_per_irrep[irrep]], dtype=float)
+
+                for i in range(51):
+                    for j in range(10):
+                        print ("coeff i, j ", i, j, [mocoeffs_per_irrep[0][i*blk][j] for blk in range(blocks[0])])
+                        # npmocoeff[i,j] = mocoeffs_per_irrep[0][i][j]
+
+                # print ("first block npmocoeff ", npmocoeff)
+
+                # temp[block][line from 1-10]
+                # for blk in range(blocks[irrep]):
+                #     for i in range(51):
+                #         print (blk, (blk+1)*10, temp[0][i] )
+                        # npmocoeff[i][blk:(blk+1)*10] = temp[blk][i]
+                # print ("raw numbers ", npmocoeff)
+
+
+                # print("array1 ", numpy.hstack((mocoeffs_per_irrep[irrep][0:51], mocoeffs_per_irrep[irrep][51:102] )))
 
                 for ind, i in enumerate(orbitals_per_irrep):
-                    print ("mocoeffs per irrep 3rd ", i, ind, [mocoeffs_per_irrep[ind][j::i] for j in range(i)])
+                    for j in intermediate[ind]:
+                        print ("i, ind, j ",i, ind, j)
+                        # print ("mocoeffs per irrep 3rd ", [mocoeffs_per_irrep[ind][k::j] for k in range(j)] )
+
+
+
+                # for ind, i in enumerate(orbitals_per_irrep):
+                #     print ("mocoeffs per irrep 3rd ", i, ind, [mocoeffs_per_irrep[ind][j::i] for j in range(i)])
 
                         # if len(moenergies_per_irrep[irrep]) != self.symm_info["orbitals_per_irrep"][irrep]:
                         #     moenergies_per_irrep[irrep].extend([numpy.nan for x in range(self.symm_info["orbitals_per_irrep"][irrep] - len(moenergies_per_irrep[irrep]))])
