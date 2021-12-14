@@ -713,13 +713,13 @@ def occup_strings_to_numbers(occup):
     """
 
     occ_string = ""
-    print ("original string ", occup)
+    # print ("original string ", occup)
     for key, val in enumerate(occup):
         print ("original chars in string ", key, val)
         #occ_string += str(i) + " "
         occup_alpha = occup.replace('a', '1').replace('2', '1')
         occup_beta =  occup.replace('b', '1').replace('2', '1')
-    print ("occup alpha ", occup_alpha)
+    # print ("occup alpha ", occup_alpha)
     return occ_string
 
 

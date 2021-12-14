@@ -1097,14 +1097,27 @@ class Molcas(logfileparser.Logfile):
                 # print ("whole mocoeff ", temp[0][0],temp[0][1] )
 
                 irrep = 0
-                npmocoeff = numpy.empty([basis_per_irrep[irrep], orbitals_per_irrep[irrep]], dtype=float)
+                npmocoeff = numpy.zeros([basis_per_irrep[irrep], orbitals_per_irrep[irrep]], dtype=float)
+
+                for bind in range(blocks[irrep]):
+                    print ("blocks ", bind, blocks[irrep] )
+
+                for i in range(51): # loop over basis functions
+                    for j in range(10): # loop over orbitals in blocks of 10
+                        npmocoeff[i,j] = mocoeffs_per_irrep[0][i][j]
 
                 for i in range(51):
                     for j in range(10):
-                        print ("coeff i, j ", i, j, [mocoeffs_per_irrep[0][i*blk][j] for blk in range(blocks[0])])
-                        # npmocoeff[i,j] = mocoeffs_per_irrep[0][i][j]
+                        npmocoeff[i,10+j] = mocoeffs_per_irrep[0][51+i][j]
 
-                # print ("first block npmocoeff ", npmocoeff)
+                for i in range(51):
+                    for j in range(4):
+                        npmocoeff[i,20+j] = mocoeffs_per_irrep[0][102+i][j]
+
+
+                numpy.set_printoptions(threshold=sys.maxsize)
+                # print ("npmocoeff ", npmocoeff)
+
 
                 # temp[block][line from 1-10]
                 # for blk in range(blocks[irrep]):
@@ -1525,7 +1538,7 @@ class Molcas(logfileparser.Logfile):
             # Replace the occupation strings with champ formatted numbers
             ci_occupations = numpy.vectorize(utils.molcas_occup_strings_to_numbers)(ci_occupations)
             #
-            print ("dets per csf ", dets_per_csf)
+            # print ("dets per csf ", dets_per_csf)
             self.ci["Dets_Per_CSF"] = dets_per_csf
             self.ci["CI_Occupations"] = ci_occupations
             self.ci["CI_Coefficients"] = ci_coeff
