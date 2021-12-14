@@ -751,8 +751,7 @@ def write_champ_v2_det(ccobj, outputdest=None):
     number_of_mappings = int(ccobj.ci["CSF_Mappings"])
 
     print ("length of ci_coeffs", ccobj.ci['CI_Coefficients'][1].shape)
-    print ("length of dets per csf ", ccobj.ci['Dets_Per_CSF'][0][2439])
-    print ("length of dets per csf ", ccobj.ci['Dets_Per_CSF'][1][2439])
+    print ("length of dets per csf ", ccobj.ci['Dets_Per_CSF'][0])
 
     if outputdest is not None:
         if isinstance(outputdest, str):

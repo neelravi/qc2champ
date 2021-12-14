@@ -16,6 +16,8 @@ from collections import Counter, OrderedDict
 
 from cclib.parser import logfileparser
 from cclib.parser import utils
+from cclib.parser.utils import uniquelist
+import sys
 
 
 class Molcas(logfileparser.Logfile):
@@ -1044,10 +1046,24 @@ class Molcas(logfileparser.Logfile):
                     mocoeffs_per_irrep[irrep].extend([ float(x) for x in tokens[3:]])
                     print ( [float(x) for x in tokens[3:]])
                     # self.set_attribute('aonames', aonames)
-                print("orbitals ", [len(i) for i in orbital_index_per_irrep])
-                # print ("mocoeffs per irrep ", mocoeffs_per_irrep[3])
+                orbitals_per_irrep = [len(i) for i in orbital_index_per_irrep]
+                print("orbital index per irrep   ", orbital_index_per_irrep)
+                print("orbitals per irrep   ", orbitals_per_irrep)
 
 
+                ## Get the intermediate list of indices needed for reshaping the coefficients array
+                intermediate = []
+                for ind, i in enumerate(orbital_index_per_irrep):
+                    print (ind, i[9::10], int(i[-1])%10 )
+                    intermediate.append( [ j for j in i[9::10] ])
+                    intermediate[ind].append(i[-1])
+                    intermediate[ind] = uniquelist(intermediate[ind])
+                    intermediate[ind] = list(map(int, intermediate[ind]))
+
+
+
+                for ind, i in enumerate(orbitals_per_irrep):
+                    print ("mocoeffs per irrep 3rd ", i, ind, [mocoeffs_per_irrep[ind][j::i] for j in range(i)])
 
                         # if len(moenergies_per_irrep[irrep]) != self.symm_info["orbitals_per_irrep"][irrep]:
                         #     moenergies_per_irrep[irrep].extend([numpy.nan for x in range(self.symm_info["orbitals_per_irrep"][irrep] - len(moenergies_per_irrep[irrep]))])
