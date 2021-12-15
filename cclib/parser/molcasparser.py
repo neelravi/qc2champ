@@ -1088,17 +1088,8 @@ class Molcas(logfileparser.Logfile):
 
                 print ("blocks ", blocks)
 
-                # rearrangement of lists
-                irrep = 0; temp=[]
-                for bind in range(blocks[irrep]):
-                    # print ( "RAW" , mocoeffs_per_irrep[irrep][bind:(bind+1)*basis_per_irrep[irrep]])
-                    temp.append(mocoeffs_per_irrep[irrep][bind:(bind+1)*basis_per_irrep[irrep]])
 
-                # print ("whole mocoeff ", temp[0][0],temp[0][1] )
-
-                irrep = 0
-                npmocoeff = numpy.zeros([num_irrep, basis_per_irrep[irrep], orbitals_per_irrep[irrep]], dtype=float)
-                print ("shape of npmocoeff ", npmocoeff.shape)
+                npmocoeff = numpy.zeros([num_irrep, max(basis_per_irrep), max(orbitals_per_irrep)], dtype=float)
 
                 numpy.set_printoptions(threshold=sys.maxsize)
 
@@ -1111,25 +1102,30 @@ class Molcas(logfileparser.Logfile):
 
 
 
-                print ("npmocoeff irrep ", 2,  npmocoeff[2,:,:])
 
+                print ("npmocoeff irrep ", 2,  npmocoeff[:,:,:])
 
-
-
-                # temp[block][line from 1-10]
-                # for blk in range(blocks[irrep]):
-                #     for i in range(51):
-                #         print (blk, (blk+1)*10, temp[0][i] )
-                        # npmocoeff[i][blk:(blk+1)*10] = temp[blk][i]
-                # print ("raw numbers ", npmocoeff)
-
-
-                # print("array1 ", numpy.hstack((mocoeffs_per_irrep[irrep][0:51], mocoeffs_per_irrep[irrep][51:102] )))
 
                 for ind, i in enumerate(orbitals_per_irrep):
                     for j in intermediate[ind]:
                         print ("i, ind, j ",i, ind, j)
                         # print ("mocoeffs per irrep 3rd ", [mocoeffs_per_irrep[ind][k::j] for k in range(j)] )
+
+
+                # i = 0; ik=0
+                # for irrep in range(num_irrep):
+                #     for iB in range(bas(irrep)):
+                #         i += 1
+                #         for j in range(nbas):
+                #             if label[j] == symbol[i] + cNumber[ik]:
+                #                 for k in range(8):
+                #                     if coord[k,i] == Cent3[j]:
+                #                         for ii in range(nbas):
+                #                             if weight == 0:
+                #                                 V[j,ii] = V[j,ii]+(C2[i,ii]*r_Norm[j])*phase(k,i)/Cent2(i)
+                #                             else:
+                #                                 V[j,ii] = V[j,ii]+(C2[i,ii]*r_Norm[j])*Phase(k,i)/numpy.sqrt(Cent2[i])
+
 
 
 
