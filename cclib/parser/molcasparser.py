@@ -1526,6 +1526,7 @@ class Molcas(logfileparser.Logfile):
             self.ci["CI_Energy"] = ci_energy
 
             # Replace the occupation strings with champ formatted numbers
+            print ("ci occupations original ", ci_occupations[0].shape)
             ci_occupations = numpy.vectorize(utils.molcas_occup_strings_to_numbers)(ci_occupations)
             #
             print ("dets per csf ", dets_per_csf[0,:])

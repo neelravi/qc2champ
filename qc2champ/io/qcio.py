@@ -749,7 +749,14 @@ def write_champ_v2_det(ccobj, outputdest=None):
     number_of_determinants = int(ccobj.ci["Number of determinants"])
     number_of_csfs = int(ccobj.ci["Number of CSFs"])
     number_of_mappings = int(ccobj.ci["CSF_Mappings"])
+    detcoeff = np.zeros(shape=(number_of_roots, number_of_csfs), dtype=float)
 
+    for root in range(number_of_roots):
+        for csf in range(number_of_csfs):
+            dets_per_csf = ccobj.ci['Dets_Per_CSF'][root,csf]
+            csfrange = csf+dets_per_csf
+            for coeff in range(csf, csfrange):
+                detcoeff[root][csf] += ccobj.ci['CSF_Coefficients'][root][csf]*ccobj.ci['CI_Coefficients'][root][coeff]
 
     if outputdest is not None:
         if isinstance(outputdest, str):
@@ -761,8 +768,8 @@ def write_champ_v2_det(ccobj, outputdest=None):
                 # DETERMINANTS section
                 file.write(f"determinants {number_of_determinants} {1} \n")
                 for root in range(number_of_roots):
-                    for csf in range(number_of_csfs):
-                        file.write(f"      {ccobj.ci['CI_Occupations'][root][csf]:s} \n")
+                    for i in range(number_of_csfs):
+                        file.write(f"      {detcoeff[root][i]:0.6f}")
                 file.write("end\n")
 
                 # CSF section
