@@ -23,7 +23,7 @@ for filename in [sys.argv[1]]:
 
 
 
-    print(f"The SCF energies {data.scfenergies}")
+#    print(f"The SCF energies {data.scfenergies}")
     print(f"The metadata {data.metadata}")
     print(f"The wfn information {data.wfn_info}")
     # print(f"The CI information {data.ci}")
@@ -33,14 +33,14 @@ for filename in [sys.argv[1]]:
     # print(f"The molecular symmetry symm info {data.symm_info}")
     # print(f"The molecular coefficients {np.shape(data.mocoeffs)}")
 
-    # qc2champ.io.ccwrite(data, outputtype="xyz", outputdest="output.xyz")
+    qc2champ.io.ccwrite(data, outputtype="xyz", outputdest="output.xyz")
     # qc2champ.io.write_champ_v2_sym(data, outputdest="MOLCAS_" + basename)
-    # qc2champ.io.write_champ_v2_geometry(data, outputdest="MOLCAS_" + basename)
+    qc2champ.io.write_champ_v2_geometry(data, outputdest="MOLCAS_" + basename)
 
     #if trexio in sys.modules:
         ## TREXIO All in One
 #    qc2champ.io.write_trexio(data, outputdest="MOLCAS_" + basename)
 
     # qc2champ.io.write_champ_v2_lcao(data, outputdest="CN3_" + basename)
-    # qc2champ.io.write_champ_v2_det(data, outputdest="MOLCAS_" + basename)
+    qc2champ.io.write_champ_v2_det(data, outputdest="MOLCAS_" + basename)
 

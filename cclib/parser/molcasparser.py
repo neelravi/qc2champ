@@ -1067,6 +1067,7 @@ class Molcas(logfileparser.Logfile):
                 for irrep in range(num_irrep):
                     mocoeffs_per_irrep[irrep] = [ele for ele in mocoeffs_per_irrep[irrep] if ele != []]
 
+
                 ### Step 2: Get the basis set information
                 irreps = OrderedDict(Counter(self.mosyms).items())
                 basis_per_irrep = []
@@ -1074,12 +1075,6 @@ class Molcas(logfileparser.Logfile):
                     basis_per_irrep.append(bas)
 
                 print ("basis_per_irrep ", basis_per_irrep)
-
-                for irrep in range(1):
-                    # print ("intermediate ", intermediate[irrep])
-                    # print ([mocoeffs_per_irrep[irrep][0:bas] for bas in basis_per_irrep])
-                    array1 = ([mocoeffs_per_irrep[irrep][0:bas] for bas in basis_per_irrep])
-
 
                 # Number of splitted blocks of 10 orbitals per irrep
                 blocks = []
@@ -1102,8 +1097,12 @@ class Molcas(logfileparser.Logfile):
 
 
 
-
-                print ("npmocoeff irrep ", 2,  npmocoeff[:,:,:])
+                # example [51, 44, 14, 18] orbitals [24, 20, 4, 6]
+                # print ("npmocoeff irrep 0 ",   npmocoeff[0,0:51,0:24])
+                # print ("npmocoeff irrep 1 ",   npmocoeff[1,0:44,0:20])
+                # print ("npmocoeff irrep 2 ",   npmocoeff[2,0:14,0:4])
+                print ("npmocoeff irrep 3 ",   npmocoeff[3,0:18,0:6])
+                print ("npmocoeff irrep 3 ",   mocoeffs_per_irrep[3][0:18][0:1])
 
 
                 for ind, i in enumerate(orbitals_per_irrep):
@@ -1472,12 +1471,12 @@ class Molcas(logfileparser.Logfile):
 
             ci_energy = numpy.ndarray(shape=(number_of_roots), dtype=float)
             csf_coeff = numpy.ndarray(shape=(number_of_roots, number_of_csfs), dtype=float)
-            dets_per_csf = numpy.ndarray(shape=(number_of_roots, number_of_csfs), dtype=int)
+            dets_per_csf = numpy.zeros(shape=(number_of_roots, number_of_csfs), dtype=int)
             csf_occupations = numpy.ndarray(shape=(number_of_roots, number_of_csfs), dtype=object)
             ci_occupations = [numpy.array([],dtype=object) for i in range(number_of_roots)]
             ci_coeff       = [numpy.array([],dtype=object) for i in range(number_of_roots)]
 
-            # dets_per_csf = 0
+
             while line[6:54] != 'Natural orbitals and occupation numbers for root':
 
                 if 'printout of CI-coefficients larger than' in line:
@@ -1503,9 +1502,7 @@ class Molcas(logfileparser.Logfile):
                     while icsf_counter < number_of_csfs:
 
                         if "sqrt" in line:
-                            # print ("CSF:: ", icsf_counter, line)
-                            # print ("initial icsf_counter", icsf_counter, icsf)
-                            dets_per_csf[root_number-1,icsf-1] += 1
+                            dets_per_csf[root_number-1,icsf_counter-1] += 1
                             ci_occupations[root_number-1] = numpy.append( ci_occupations[root_number-1], line.split()[4])
                             # Read the phase factor + or -
                             if line.split()[0] == "-":
@@ -1521,9 +1518,8 @@ class Molcas(logfileparser.Logfile):
                         else:
                             icsf_counter += 1
                             icsf = int(line.split()[0])
-                            # print ("CI::            ", icsf_counter, line)
                             csf_occupations[root_number-1,icsf-1]  = line.split()[1]
-                            csf_coeff[root_number-1,icsf-1] = line.split()[3]
+                            csf_coeff[root_number-1,icsf-1] = line.split()[2]
                             line = next(inputfile)
                 line = next(inputfile)
             self.ci["CSF_Mappings"] = csfmap_counter
@@ -1531,7 +1527,9 @@ class Molcas(logfileparser.Logfile):
             # Replace the occupation strings with champ formatted numbers
             ci_occupations = numpy.vectorize(utils.molcas_occup_strings_to_numbers)(ci_occupations)
             #
-            # print ("dets per csf ", dets_per_csf)
+            print ("dets per csf ", dets_per_csf[0,:])
+            print ("dets per csf ", dets_per_csf.shape)
+            print ("ci coeff  ", ci_coeff[0][12])
             self.ci["Dets_Per_CSF"] = dets_per_csf
             self.ci["CI_Occupations"] = ci_occupations
             self.ci["CI_Coefficients"] = ci_coeff
