@@ -958,14 +958,7 @@ class Molcas(logfileparser.Logfile):
             types_of_basis_functions = Counter([item[1:2] for item in symm_adapted_basis["type"]])
             print ("types of basis functions", types_of_basis_functions)
 
-            # testorb=[]; m = 0
-            # orbfile = open('cn5-c2v-BFD-Da-cas610_sym2.ScfOrb','r')
-            # line2 = orbfile.readline()
-            # new_coeffs=[]; m = 0
-            # while ( (len(line2.split())<3) or (line2.split()[1]!='ORBITAL') or (int(line2.split()[2])!=1+1) ):
-            #     line2=orbfile.readline();  m=m+1
-            # line2=orbfile.readline()
-            # print ("line2 ", line2)
+
             num_irrep =  len(list_irrep)
             print ("do i come here", num_irrep)
             if (num_irrep == 1):
