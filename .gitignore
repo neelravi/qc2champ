@@ -26,3 +26,6 @@ output2
 rhf_c2v-BFD-Da.out
 sample_acrolein_cas2.out
 thiophene-c2v-augt-casscf-sa3-geo-cc3.out
+trex/
+temp
+MOLCAS_*
