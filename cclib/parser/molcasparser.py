@@ -958,15 +958,19 @@ class Molcas(logfileparser.Logfile):
             types_of_basis_functions = Counter([item[1:2] for item in symm_adapted_basis["type"]])
             print ("types of basis functions", types_of_basis_functions)
 
-            testorb=[]; m = 0
-            orbfile = open('cn5-c2v-BFD-Da-cas610_sym2.ScfOrb','r')
-            line2 = orbfile.readline()
-            new_coeffs=[]; m = 0
-            while ( (len(line2.split())<3) or (line2.split()[1]!='ORBITAL') or (int(line2.split()[2])!=1+1) ):
-                line2=orbfile.readline();  m=m+1
-            line2=orbfile.readline()
-            print ("line2 ", line2)
+            # testorb=[]; m = 0
+            # orbfile = open('cn5-c2v-BFD-Da-cas610_sym2.ScfOrb','r')
+            # line2 = orbfile.readline()
+            # new_coeffs=[]; m = 0
+            # while ( (len(line2.split())<3) or (line2.split()[1]!='ORBITAL') or (int(line2.split()[2])!=1+1) ):
+            #     line2=orbfile.readline();  m=m+1
+            # line2=orbfile.readline()
+            # print ("line2 ", line2)
             num_irrep =  len(list_irrep)
+            print ("do i come here", num_irrep)
+            if (num_irrep == 1):
+                self.mosyms = ["a"]
+                self.set_attribute('mosyms', self.mosyms)
             irreps = OrderedDict(Counter(self.mosyms).items())
             print (irreps, len(irreps))
             for _, bas in irreps.items():
@@ -1001,7 +1005,8 @@ class Molcas(logfileparser.Logfile):
             line = next(inputfile)
 
             # We don't currently support parsing natural orbitals or active space orbitals.
-            if 'Natural orbitals' not in line and "Pseudonatural" not in line and 'Quasi-canonical orbitals' not in line:
+            # if 'Natural orbitals' not in line and "Pseudonatural" not in line and 'Quasi-canonical orbitals' not in line:
+            if 'Natural orbitals' not in line and "Pseudonatural" not in line:
                 self.skip_line(inputfile, 'b')
 
                 homos = 0
@@ -1011,6 +1016,12 @@ class Molcas(logfileparser.Logfile):
                 moenergies_per_irrep = [[] for i in range(num_irrep)]
                 # aonames_per_irrep = [[] for i in range(num_irrep)]
                 orbital_index_per_irrep = [[] for i in range(num_irrep)]
+
+                if (num_irrep == 1):
+                    self.mosyms = [item for item in ["a"] for i in range(basis_per_irrep[0])]
+                    self.set_attribute('mosyms', self.mosyms)
+                irreps = OrderedDict(Counter(self.mosyms).items())
+
 
                 line = next(inputfile)
                 tokens = line.split()
@@ -1101,8 +1112,8 @@ class Molcas(logfileparser.Logfile):
                 # print ("npmocoeff irrep 0 ",   npmocoeff[0,0:51,0:24])
                 # print ("npmocoeff irrep 1 ",   npmocoeff[1,0:44,0:20])
                 # print ("npmocoeff irrep 2 ",   npmocoeff[2,0:14,0:4])
-                print ("npmocoeff irrep 3 ",   npmocoeff[3,0:18,0:6])
-                print ("npmocoeff irrep 3 ",   mocoeffs_per_irrep[3][0:18][0:1])
+                # print ("npmocoeff irrep 3 ",   npmocoeff[3,0:18,0:6])
+                # print ("npmocoeff irrep 3 ",   mocoeffs_per_irrep[3][0:18][0:1])
 
 
                 for ind, i in enumerate(orbitals_per_irrep):
