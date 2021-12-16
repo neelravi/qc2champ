@@ -1524,12 +1524,11 @@ class Molcas(logfileparser.Logfile):
                 line = next(inputfile)
             self.ci["CSF_Mappings"] = csfmap_counter
             self.ci["CI_Energy"] = ci_energy
+
             # Replace the occupation strings with champ formatted numbers
             ci_occupations = numpy.vectorize(utils.molcas_occup_strings_to_numbers)(ci_occupations)
             #
             print ("dets per csf ", dets_per_csf[0,:])
-            print ("dets per csf ", dets_per_csf.shape)
-            print ("ci coeff  ", ci_coeff[0][12])
             self.ci["Dets_Per_CSF"] = dets_per_csf
             self.ci["CI_Occupations"] = ci_occupations
             self.ci["CI_Coefficients"] = ci_coeff

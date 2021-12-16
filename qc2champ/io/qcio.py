@@ -781,7 +781,7 @@ def write_champ_v2_det(ccobj, outputdest=None):
                         csfrange = csf+dets_per_csf
                         file.write(f"{dets_per_csf:d} \n")
                         for coeff in range(csf, csfrange):
-                            file.write(f"         {ccobj.ci['CI_Coefficients'][root][coeff]:.6f} \n")
+                            file.write(f" {coeff}        {ccobj.ci['CI_Coefficients'][root][coeff]:.6f} \n")
 
 
                 file.write("\n")
