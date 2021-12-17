@@ -960,7 +960,6 @@ class Molcas(logfileparser.Logfile):
 
 
             num_irrep =  len(list_irrep)
-            print ("do i come here", num_irrep)
             if (num_irrep == 1):
                 self.mosyms = ["a"]
                 self.set_attribute('mosyms', self.mosyms)
@@ -1087,22 +1086,32 @@ class Molcas(logfileparser.Logfile):
 
                 print ("blocks ", blocks)
 
+                print ("mocoeffs_per_irrep ", mocoeffs_per_irrep)
+
 
                 npmocoeff = numpy.zeros([num_irrep, max(basis_per_irrep), max(orbitals_per_irrep)], dtype=float)
 
                 numpy.set_printoptions(threshold=sys.maxsize)
 
-                for irrep in range(num_irrep):                          # Run loop over all irreps
-                    for ind in range(blocks[irrep]):                    # Run loop over all blocks of 10 orbitals
-                        blockoften =  intermediate[0][ind] - 10*ind     # Get the block number
-                        for i in range(basis_per_irrep[irrep]):         # Run loop over all basis functions
-                            for j in range(blockoften):                 # Run loop over all orbitals in block
-                                npmocoeff[irrep, i, 10*ind + j] = mocoeffs_per_irrep[0][basis_per_irrep[irrep]*ind+i][j]
+                if num_irrep == 1:
+                    for irrep in range(num_irrep):                          # Run loop over all irreps
+                        for ind in range(blocks[irrep]):                    # Run loop over all blocks of 10 orbitals
+                            blockoften =  intermediate[0][ind] - 10*ind     # Get the block number
+                            for i in range(basis_per_irrep[irrep]):         # Run loop over all basis functions
+                                for j in range(blockoften):                 # Run loop over all orbitals in block
+                                    npmocoeff[irrep, i, 10*ind + j] = mocoeffs_per_irrep[0][basis_per_irrep[irrep]*ind+i][j]
+                else:
+                    for irrep in range(num_irrep):                          # Run loop over all irreps
+                        for ind in range(blocks[irrep]):                    # Run loop over all blocks of 10 orbitals
+                            blockoften =  intermediate[0][ind] - 10*ind     # Get the block number
+                            for i in range(basis_per_irrep[irrep]):         # Run loop over all basis functions
+                                for j in range(blockoften):                 # Run loop over all orbitals in block
+                                    npmocoeff[irrep, i, 10*ind + j] = mocoeffs_per_irrep[0][basis_per_irrep[irrep]*ind+i][j]
 
 
-
+                self.append_attribute('mocoeffs', npmocoeff)
                 # example [51, 44, 14, 18] orbitals [24, 20, 4, 6]
-                # print ("npmocoeff irrep 0 ",   npmocoeff[0,0:51,0:24])
+                # print ("npmocoeff irrep 0 ",   npmocoeff[0,:,:])
                 # print ("npmocoeff irrep 1 ",   npmocoeff[1,0:44,0:20])
                 # print ("npmocoeff irrep 2 ",   npmocoeff[2,0:14,0:4])
                 # print ("npmocoeff irrep 3 ",   npmocoeff[3,0:18,0:6])
