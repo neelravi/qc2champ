@@ -613,6 +613,12 @@ def write_trexio(ccobj, outputdest=None):
 
             trexio.write_nucleus_label(trexio_file, element_list)
 
+            # Molecular Group
+            trexio.write_mo_type(trexio_file, "RASSCF")
+            trexio.write_mo_num(trexio_file, ccobj.mocoeffs[0][0].shape[0])
+            trexio.write_mo_coefficient(trexio_file, ccobj.mocoeffs[0][0])
+
+
         else:
             raise ValueError
     # If outputdest is None, return a string representation of the output.
