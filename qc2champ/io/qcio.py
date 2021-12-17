@@ -604,20 +604,32 @@ def write_trexio(ccobj, outputdest=None):
     if outputdest is not None:
         if isinstance(outputdest, str):
             trexio_file = trexio.File(outputdest + ".hdf5", mode='w', back_end=trexio.TREXIO_HDF5)
+
+            ## Metadata
+            trexio.write_metadata_code_num(trexio_file, 1)
+            trexio.write_metadata_code(trexio_file, [ccobj.metadata['package']])
+            trexio.write_metadata_author_num(trexio_file, 1)
+            trexio.write_metadata_author(trexio_file, [ccobj.metadata['author']])
+            trexio.write_metadata_description(trexio_file, "File Conversion using qc2trexio package written by Ravindra Shinde")
+
+            #Electron group ## Revisit this group. Don't make it package specific
+            # trexio.write_electron_up_num(trexio_file, int(ccobj.wfn_info['nelec_closed_shell']))
+            # trexio.write_electron_dn_num(trexio_file, int(ccobj.wfn_info['nelec_closed_shell']))
+
+            #Nucleus group
             trexio.write_nucleus_num(trexio_file, ccobj.natom)
             trexio.write_nucleus_coord(trexio_file, convertor(ccobj.atomcoords.flatten(), "Angstrom", "bohr"))
             trexio.write_nucleus_charge(trexio_file, ccobj.atomnos)
 
             pt = PeriodicTable()
             element_list = [pt.element[Z] for Z in ccobj.atomnos]
-
             trexio.write_nucleus_label(trexio_file, element_list)
 
             # Molecular Group
-            trexio.write_mo_type(trexio_file, "RASSCF")
-            trexio.write_mo_num(trexio_file, ccobj.mocoeffs[0][0].shape[0])
+            trexio.write_mo_type(trexio_file, "RASSCF")  # parse this from the file.
+            trexio.write_ao_num(trexio_file, ccobj.mocoeffs[0][0].shape[0])
+            trexio.write_mo_num(trexio_file, ccobj.mocoeffs[0][0].shape[1])
             trexio.write_mo_coefficient(trexio_file, ccobj.mocoeffs[0][0])
-
 
         else:
             raise ValueError

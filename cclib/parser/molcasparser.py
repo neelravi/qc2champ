@@ -110,6 +110,8 @@ class Molcas(logfileparser.Logfile):
             match = re.search(r"\*\s*build\s(\S*)\s*\*", line)
             if match:
                 self.metadata["revision"] = match.groups()[0]
+        if "is licensed to" in line:
+            self.metadata["author"] = " ".join(line.split()[-2:])
 
         ## This section is present when executing &GATEWAY.
         # ++    Molecular structure info:
