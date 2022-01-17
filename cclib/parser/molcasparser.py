@@ -110,6 +110,8 @@ class Molcas(logfileparser.Logfile):
             match = re.search(r"\*\s*build\s(\S*)\s*\*", line)
             if match:
                 self.metadata["revision"] = match.groups()[0]
+        if "is licensed to" in line:
+            self.metadata["author"] = " ".join(line.split()[-2:])
 
         ## This section is present when executing &GATEWAY.
         # ++    Molecular structure info:
@@ -967,6 +969,9 @@ class Molcas(logfileparser.Logfile):
             # line2=orbfile.readline()
             # print ("line2 ", line2)
             num_irrep =  len(list_irrep)
+            if (num_irrep == 1):
+                self.mosyms = ["a"]
+                self.set_attribute('mosyms', self.mosyms)
             irreps = OrderedDict(Counter(self.mosyms).items())
             # print (irreps, len(irreps))
             for _, bas in irreps.items():
@@ -1001,7 +1006,8 @@ class Molcas(logfileparser.Logfile):
             line = next(inputfile)
 
             # We don't currently support parsing natural orbitals or active space orbitals.
-            if 'Natural orbitals' not in line and "Pseudonatural" not in line and 'Quasi-canonical orbitals' not in line:
+            # if 'Natural orbitals' not in line and "Pseudonatural" not in line and 'Quasi-canonical orbitals' not in line:
+            if 'Natural orbitals' not in line and "Pseudonatural" not in line:
                 self.skip_line(inputfile, 'b')
 
                 homos = 0
@@ -1011,6 +1017,12 @@ class Molcas(logfileparser.Logfile):
                 moenergies_per_irrep = [[] for i in range(num_irrep)]
                 # aonames_per_irrep = [[] for i in range(num_irrep)]
                 orbital_index_per_irrep = [[] for i in range(num_irrep)]
+
+                if (num_irrep == 1):
+                    self.mosyms = [item for item in ["a"] for i in range(basis_per_irrep[0])]
+                    self.set_attribute('mosyms', self.mosyms)
+                irreps = OrderedDict(Counter(self.mosyms).items())
+
 
                 line = next(inputfile)
                 tokens = line.split()
@@ -1083,18 +1095,27 @@ class Molcas(logfileparser.Logfile):
 
                 # print ("blocks ", blocks)
 
+                print ("mocoeffs_per_irrep ", mocoeffs_per_irrep)
+
 
                 npmocoeff = numpy.zeros([num_irrep, max(basis_per_irrep), max(orbitals_per_irrep)], dtype=float)
 
                 numpy.set_printoptions(threshold=sys.maxsize)
 
-                for irrep in range(num_irrep):                          # Run loop over all irreps
-                    for ind in range(blocks[irrep]):                    # Run loop over all blocks of 10 orbitals
-                        blockoften =  intermediate[0][ind] - 10*ind     # Get the block number
-                        for i in range(basis_per_irrep[irrep]):         # Run loop over all basis functions
-                            for j in range(blockoften):                 # Run loop over all orbitals in block
-                                npmocoeff[irrep, i, 10*ind + j] = mocoeffs_per_irrep[0][basis_per_irrep[irrep]*ind+i][j]
-
+                if num_irrep == 1:
+                    for irrep in range(num_irrep):                          # Run loop over all irreps
+                        for ind in range(blocks[irrep]):                    # Run loop over all blocks of 10 orbitals
+                            blockoften =  intermediate[0][ind] - 10*ind     # Get the block number
+                            for i in range(basis_per_irrep[irrep]):         # Run loop over all basis functions
+                                for j in range(blockoften):                 # Run loop over all orbitals in block
+                                    npmocoeff[irrep, i, 10*ind + j] = mocoeffs_per_irrep[0][basis_per_irrep[irrep]*ind+i][j]
+                else:
+                    for irrep in range(num_irrep):                          # Run loop over all irreps
+                        for ind in range(blocks[irrep]):                    # Run loop over all blocks of 10 orbitals
+                            blockoften =  intermediate[0][ind] - 10*ind     # Get the block number
+                            for i in range(basis_per_irrep[irrep]):         # Run loop over all basis functions
+                                for j in range(blockoften):                 # Run loop over all orbitals in block
+                                    npmocoeff[irrep, i, 10*ind + j] = mocoeffs_per_irrep[0][basis_per_irrep[irrep]*ind+i][j]
 
 
 
@@ -1510,10 +1531,11 @@ class Molcas(logfileparser.Logfile):
                 line = next(inputfile)
             self.ci["CSF_Mappings"] = csfmap_counter
             self.ci["CI_Energy"] = ci_energy
+
             # Replace the occupation strings with champ formatted numbers
+            print ("ci occupations original ", ci_occupations[0].shape)
             ci_occupations = numpy.vectorize(utils.molcas_occup_strings_to_numbers)(ci_occupations)
             #
-
             self.ci["Dets_Per_CSF"] = dets_per_csf
             self.ci["CI_Occupations"] = ci_occupations
             self.ci["CI_Coefficients"] = ci_coeff

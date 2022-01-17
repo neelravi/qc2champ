@@ -604,14 +604,32 @@ def write_trexio(ccobj, outputdest=None):
     if outputdest is not None:
         if isinstance(outputdest, str):
             trexio_file = trexio.File(outputdest + ".hdf5", mode='w', back_end=trexio.TREXIO_HDF5)
+
+            ## Metadata
+            trexio.write_metadata_code_num(trexio_file, 1)
+            trexio.write_metadata_code(trexio_file, [ccobj.metadata['package']])
+            trexio.write_metadata_author_num(trexio_file, 1)
+            trexio.write_metadata_author(trexio_file, [ccobj.metadata['author']])
+            trexio.write_metadata_description(trexio_file, "File Conversion using qc2trexio package written by Ravindra Shinde")
+
+            #Electron group ## Revisit this group. Don't make it package specific
+            # trexio.write_electron_up_num(trexio_file, int(ccobj.wfn_info['nelec_closed_shell']))
+            # trexio.write_electron_dn_num(trexio_file, int(ccobj.wfn_info['nelec_closed_shell']))
+
+            #Nucleus group
             trexio.write_nucleus_num(trexio_file, ccobj.natom)
             trexio.write_nucleus_coord(trexio_file, convertor(ccobj.atomcoords.flatten(), "Angstrom", "bohr"))
             trexio.write_nucleus_charge(trexio_file, ccobj.atomnos)
 
             pt = PeriodicTable()
             element_list = [pt.element[Z] for Z in ccobj.atomnos]
-
             trexio.write_nucleus_label(trexio_file, element_list)
+
+            # Molecular Group
+            trexio.write_mo_type(trexio_file, "RASSCF")  # parse this from the file.
+            trexio.write_ao_num(trexio_file, ccobj.mocoeffs[0][0].shape[0])
+            trexio.write_mo_num(trexio_file, ccobj.mocoeffs[0][0].shape[1])
+            trexio.write_mo_coefficient(trexio_file, ccobj.mocoeffs[0][0])
 
         else:
             raise ValueError
@@ -692,7 +710,7 @@ def write_champ_v2_lcao(ccobj, outputdest=None):
                 # header line printed below
                 file.write("# Comments about the system being studied \n")
                 file.write("lcao " + str(len(ccobj.mocoeffs[0][0])) + " " + str(len(ccobj.mocoeffs[0][0])) + "\n" )
-                np.savetxt(file, ccobj.mocoeffs[0][:])
+                np.savetxt(file, ccobj.mocoeffs[0][0], fmt='%0.8f')
                 file.write("end\n")
             file.close()
 
@@ -749,7 +767,14 @@ def write_champ_v2_det(ccobj, outputdest=None):
     number_of_determinants = int(ccobj.ci["Number of determinants"])
     number_of_csfs = int(ccobj.ci["Number of CSFs"])
     number_of_mappings = int(ccobj.ci["CSF_Mappings"])
+    detcoeff = np.zeros(shape=(number_of_roots, number_of_csfs), dtype=float)
 
+    for root in range(number_of_roots):
+        for csf in range(number_of_csfs):
+            dets_per_csf = ccobj.ci['Dets_Per_CSF'][root,csf]
+            csfrange = csf+dets_per_csf
+            for coeff in range(csf, csfrange):
+                detcoeff[root][csf] += ccobj.ci['CSF_Coefficients'][root][csf]*ccobj.ci['CI_Coefficients'][root][coeff]
 
     for root in range(number_of_roots):
         determinant_coefficients = []
@@ -772,8 +797,8 @@ def write_champ_v2_det(ccobj, outputdest=None):
                 # DETERMINANTS section
                 file.write(f"determinants {number_of_determinants} {1} \n")
                 for root in range(number_of_roots):
-                    for csf in range(number_of_csfs):
-                        file.write(f"      {ccobj.ci['CI_Occupations'][root][csf]:s} \n")
+                    for i in range(number_of_csfs):
+                        file.write(f"      {detcoeff[root][i]:0.6f}")
                 file.write("end\n")
 
                 # CSF section
@@ -792,7 +817,7 @@ def write_champ_v2_det(ccobj, outputdest=None):
                         csfrange = csf+dets_per_csf
                         file.write(f"{dets_per_csf:d} \n")
                         for coeff in range(csf, csfrange):
-                            file.write(f"         {ccobj.ci['CI_Coefficients'][root][coeff]:.6f} \n")
+                            file.write(f" {coeff}        {ccobj.ci['CI_Coefficients'][root][coeff]:.6f} \n")
 
 
                 file.write("\n")
