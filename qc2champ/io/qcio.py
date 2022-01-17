@@ -751,6 +751,17 @@ def write_champ_v2_det(ccobj, outputdest=None):
     number_of_mappings = int(ccobj.ci["CSF_Mappings"])
 
 
+    for root in range(number_of_roots):
+        determinant_coefficients = []
+        vector = []
+        for i,c in enumerate(ccobj.ci["CI_Coefficients"][root]):
+            for d in ccobj.ci["CSF_Coefficients"][root]:
+                vector.append(c*d)
+        determinant_coefficients.append(vector)
+    # print ("determinant coefficients ", determinant_coefficients)
+
+
+
     if outputdest is not None:
         if isinstance(outputdest, str):
             ## Write down a symmetry file in old champ format

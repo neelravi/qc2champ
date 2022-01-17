@@ -958,17 +958,17 @@ class Molcas(logfileparser.Logfile):
             types_of_basis_functions = Counter([item[1:2] for item in symm_adapted_basis["type"]])
             print ("types of basis functions", types_of_basis_functions)
 
-            testorb=[]; m = 0
-            orbfile = open('cn5-c2v-BFD-Da-cas610_sym2.ScfOrb','r')
-            line2 = orbfile.readline()
-            new_coeffs=[]; m = 0
-            while ( (len(line2.split())<3) or (line2.split()[1]!='ORBITAL') or (int(line2.split()[2])!=1+1) ):
-                line2=orbfile.readline();  m=m+1
-            line2=orbfile.readline()
-            print ("line2 ", line2)
+            # testorb=[]; m = 0
+            # orbfile = open('cn5-c2v-BFD-Da-cas610_sym2.ScfOrb','r')
+            # line2 = orbfile.readline()
+            # new_coeffs=[]; m = 0
+            # while ( (len(line2.split())<3) or (line2.split()[1]!='ORBITAL') or (int(line2.split()[2])!=1+1) ):
+            #     line2=orbfile.readline();  m=m+1
+            # line2=orbfile.readline()
+            # print ("line2 ", line2)
             num_irrep =  len(list_irrep)
             irreps = OrderedDict(Counter(self.mosyms).items())
-            print (irreps, len(irreps))
+            # print (irreps, len(irreps))
             for _, bas in irreps.items():
                 print (bas)
             ## AO information ends here
@@ -1044,11 +1044,11 @@ class Molcas(logfileparser.Logfile):
                     info = tokens[3:]
                     j = 0
                     mocoeffs_per_irrep[irrep].append([ float(x) for x in tokens[3:]])
-                    print ( [float(x) for x in tokens[3:]])
+                    # print ( [float(x) for x in tokens[3:]])
                     # self.set_attribute('aonames', aonames)
                 orbitals_per_irrep = [len(i) for i in orbital_index_per_irrep]
-                print("orbital index per irrep   ", orbital_index_per_irrep)
-                print("orbitals per irrep   ", orbitals_per_irrep)
+                # print("orbital index per irrep   ", orbital_index_per_irrep)
+                # print("orbitals per irrep   ", orbitals_per_irrep)
 
 
                 ## Get the intermediate list of indices needed for reshaping the coefficients array
@@ -1060,7 +1060,7 @@ class Molcas(logfileparser.Logfile):
                     intermediate[ind] = uniquelist(intermediate[ind])
                     intermediate[ind] = list(map(int, intermediate[ind]))
 
-                print ("intermediate ", intermediate)
+                # print ("intermediate ", intermediate)
                 ## Convert the parsed mocoeffs data into an ordered arrays.
 
                 ### Step 1: Remove empty lists from the list of lists
@@ -1074,14 +1074,14 @@ class Molcas(logfileparser.Logfile):
                 for _, bas in irreps.items():
                     basis_per_irrep.append(bas)
 
-                print ("basis_per_irrep ", basis_per_irrep)
+                # print ("basis_per_irrep ", basis_per_irrep)
 
                 # Number of splitted blocks of 10 orbitals per irrep
                 blocks = []
                 for blk in intermediate:
                     blocks.append(len(blk))
 
-                print ("blocks ", blocks)
+                # print ("blocks ", blocks)
 
 
                 npmocoeff = numpy.zeros([num_irrep, max(basis_per_irrep), max(orbitals_per_irrep)], dtype=float)
@@ -1096,19 +1096,6 @@ class Molcas(logfileparser.Logfile):
                                 npmocoeff[irrep, i, 10*ind + j] = mocoeffs_per_irrep[0][basis_per_irrep[irrep]*ind+i][j]
 
 
-
-                # example [51, 44, 14, 18] orbitals [24, 20, 4, 6]
-                # print ("npmocoeff irrep 0 ",   npmocoeff[0,0:51,0:24])
-                # print ("npmocoeff irrep 1 ",   npmocoeff[1,0:44,0:20])
-                # print ("npmocoeff irrep 2 ",   npmocoeff[2,0:14,0:4])
-                print ("npmocoeff irrep 3 ",   npmocoeff[3,0:18,0:6])
-                print ("npmocoeff irrep 3 ",   mocoeffs_per_irrep[3][0:18][0:1])
-
-
-                for ind, i in enumerate(orbitals_per_irrep):
-                    for j in intermediate[ind]:
-                        print ("i, ind, j ",i, ind, j)
-                        # print ("mocoeffs per irrep 3rd ", [mocoeffs_per_irrep[ind][k::j] for k in range(j)] )
 
 
                 # i = 0; ik=0
@@ -1464,7 +1451,6 @@ class Molcas(logfileparser.Logfile):
 
         if 'Wave function printout:' in line:
             from fractions import Fraction
-            print ("in wavefunction printout ", self.ci)
             number_of_roots = int(self.ci["Number of root(s) required"])
             number_of_determinants = int(self.ci["Number of determinants"])
             number_of_csfs = int(self.ci["Number of CSFs"])
@@ -1527,9 +1513,7 @@ class Molcas(logfileparser.Logfile):
             # Replace the occupation strings with champ formatted numbers
             ci_occupations = numpy.vectorize(utils.molcas_occup_strings_to_numbers)(ci_occupations)
             #
-            print ("dets per csf ", dets_per_csf[0,:])
-            print ("dets per csf ", dets_per_csf.shape)
-            print ("ci coeff  ", ci_coeff[0][12])
+
             self.ci["Dets_Per_CSF"] = dets_per_csf
             self.ci["CI_Occupations"] = ci_occupations
             self.ci["CI_Coefficients"] = ci_coeff

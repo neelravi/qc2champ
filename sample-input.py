@@ -39,7 +39,7 @@ for filename in [sys.argv[1]]:
 
     #if trexio in sys.modules:
         ## TREXIO All in One
-#    qc2champ.io.write_trexio(data, outputdest="MOLCAS_" + basename)
+    qc2champ.io.write_trexio(data, outputdest="MOLCAS_" + basename)
 
     # qc2champ.io.write_champ_v2_lcao(data, outputdest="CN3_" + basename)
     qc2champ.io.write_champ_v2_det(data, outputdest="MOLCAS_" + basename)
