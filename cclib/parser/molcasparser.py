@@ -1017,6 +1017,7 @@ class Molcas(logfileparser.Logfile):
                 moenergies_per_irrep = [[] for i in range(num_irrep)]
                 # aonames_per_irrep = [[] for i in range(num_irrep)]
                 orbital_index_per_irrep = [[] for i in range(num_irrep)]
+                mocoeffs = [[]]
 
                 if (num_irrep == 1):
                     self.mosyms = [item for item in ["a"] for i in range(basis_per_irrep[0])]
@@ -1059,9 +1060,10 @@ class Molcas(logfileparser.Logfile):
                     # print ( [float(x) for x in tokens[3:]])
                     # self.set_attribute('aonames', aonames)
                 orbitals_per_irrep = [len(i) for i in orbital_index_per_irrep]
-                # print("orbital index per irrep   ", orbital_index_per_irrep)
-                # print("orbitals per irrep   ", orbitals_per_irrep)
-
+                print("orbital index per irrep   ", orbital_index_per_irrep)
+                print("orbitals per irrep   ", orbitals_per_irrep)
+                
+                
 
                 ## Get the intermediate list of indices needed for reshaping the coefficients array
                 intermediate = []
@@ -1086,16 +1088,16 @@ class Molcas(logfileparser.Logfile):
                 for _, bas in irreps.items():
                     basis_per_irrep.append(bas)
 
-                # print ("basis_per_irrep ", basis_per_irrep)
+                print ("basis_per_irrep ", basis_per_irrep)
 
                 # Number of splitted blocks of 10 orbitals per irrep
                 blocks = []
                 for blk in intermediate:
                     blocks.append(len(blk))
 
-                # print ("blocks ", blocks)
+                print ("blocks ", blocks)
 
-                print ("mocoeffs_per_irrep ", mocoeffs_per_irrep)
+                # print ("mocoeffs_per_irrep ", mocoeffs_per_irrep)
 
 
                 npmocoeff = numpy.zeros([num_irrep, max(basis_per_irrep), max(orbitals_per_irrep)], dtype=float)
@@ -1117,7 +1119,9 @@ class Molcas(logfileparser.Logfile):
                                 for j in range(blockoften):                 # Run loop over all orbitals in block
                                     npmocoeff[irrep, i, 10*ind + j] = mocoeffs_per_irrep[0][basis_per_irrep[irrep]*ind+i][j]
 
-
+                if num_irrep == 1:
+                    self.append_attribute('mocoeffs', (numpy.transpose(npmocoeff[0])).tolist())
+                # print ("self mocoeffs 3rd orbs ", self.mocoeffs[0][2])
 
                 # i = 0; ik=0
                 # for irrep in range(num_irrep):
@@ -1137,7 +1141,7 @@ class Molcas(logfileparser.Logfile):
 
 
                 # for ind, i in enumerate(orbitals_per_irrep):
-                #     print ("mocoeffs per irrep 3rd ", i, ind, [mocoeffs_per_irrep[ind][j::i] for j in range(i)])
+                    # print ("mocoeffs per irrep 3rd ", i, ind, [mocoeffs_per_irrep[ind][j::i] for j in range(i)])
 
                         # if len(moenergies_per_irrep[irrep]) != self.symm_info["orbitals_per_irrep"][irrep]:
                         #     moenergies_per_irrep[irrep].extend([numpy.nan for x in range(self.symm_info["orbitals_per_irrep"][irrep] - len(moenergies_per_irrep[irrep]))])
