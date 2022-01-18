@@ -708,9 +708,9 @@ def write_champ_v2_lcao(ccobj, outputdest=None):
             with open(outputdest + ".lcao", 'w') as file:
 
                 # header line printed below
-                file.write("# Comments about the system being studied \n")
-                file.write("lcao " + str(len(ccobj.mocoeffs[0][0])) + " " + str(len(ccobj.mocoeffs[0][0])) + "\n" )
-                np.savetxt(file, ccobj.mocoeffs[0][0], fmt='%0.8f')
+                file.write("# Molecular Coefficients. Generated using qc2champ package https://github.com/neelravi/qc2champ. \n")                
+                file.write("lcao " + str(len(ccobj.mocoeffs[0][0])) + " " + str(len(ccobj.mocoeffs[0][0])) + " 1 " + "\n" )
+                np.savetxt(file, ccobj.mocoeffs[0], fmt='%0.8f')
                 file.write("end\n")
             file.close()
 

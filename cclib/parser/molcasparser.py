@@ -1060,8 +1060,8 @@ class Molcas(logfileparser.Logfile):
                     # print ( [float(x) for x in tokens[3:]])
                     # self.set_attribute('aonames', aonames)
                 orbitals_per_irrep = [len(i) for i in orbital_index_per_irrep]
-                print("orbital index per irrep   ", orbital_index_per_irrep)
-                print("orbitals per irrep   ", orbitals_per_irrep)
+                # print("orbital index per irrep   ", orbital_index_per_irrep)
+                # print("orbitals per irrep   ", orbitals_per_irrep)
                 
                 
 
@@ -1088,14 +1088,14 @@ class Molcas(logfileparser.Logfile):
                 for _, bas in irreps.items():
                     basis_per_irrep.append(bas)
 
-                print ("basis_per_irrep ", basis_per_irrep)
+                # print ("basis_per_irrep ", basis_per_irrep)
 
                 # Number of splitted blocks of 10 orbitals per irrep
                 blocks = []
                 for blk in intermediate:
                     blocks.append(len(blk))
 
-                print ("blocks ", blocks)
+                # print ("blocks ", blocks)
 
                 # print ("mocoeffs_per_irrep ", mocoeffs_per_irrep)
 
