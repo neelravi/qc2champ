@@ -811,6 +811,12 @@ def write_champ_v2_det(ccobj, outputdest=None):
                 file.write("\n")
                 file.write("end\n")
 
+                for i in range(len(determinant_coefficients[0])):
+                    file.write(ccobj.ci["CI_Occupations"][0][i] + "\n")
+                file.write("end\n")
+
+
+
                 # CSF section
                 file.write(f"csf {number_of_csfs} {number_of_roots} \n")
                 for root in range(number_of_roots):
