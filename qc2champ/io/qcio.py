@@ -708,7 +708,8 @@ def write_champ_v2_lcao(ccobj, outputdest=None):
             with open(outputdest + ".lcao", 'w') as file:
 
                 # header line printed below
-                file.write("# Molecular Coefficients. Generated using qc2champ package https://github.com/neelravi/qc2champ. \n")                
+                file.write("# Molecular Coefficients. Generated using qc2champ package https://github.com/neelravi/qc2champ. \n")
+                file.write("# keyword number_of_orbitals number_of_ao_basis iwft \n")
                 file.write("lcao " + str(len(ccobj.mocoeffs[0][0])) + " " + str(len(ccobj.mocoeffs[0][0])) + " 1 " + "\n" )
                 np.savetxt(file, ccobj.mocoeffs[0], fmt='%0.8f')
                 file.write("end\n")
@@ -778,12 +779,12 @@ def write_champ_v2_det(ccobj, outputdest=None):
 
     for root in range(number_of_roots):
         determinant_coefficients = []
-        vector = []
+        vector = []; temp = 0.0
         for i,c in enumerate(ccobj.ci["CI_Coefficients"][root]):
             for d in ccobj.ci["CSF_Coefficients"][root]:
-                vector.append(c*d)
+                temp += c*d
+            vector.append(temp)
         determinant_coefficients.append(vector)
-    # print ("determinant coefficients ", determinant_coefficients)
 
 
 
@@ -795,10 +796,19 @@ def write_champ_v2_det(ccobj, outputdest=None):
                 # if ccobj.scftype in ["RHF", "UHF", "ROHF"]:
 
                 # DETERMINANTS section
-                file.write(f"determinants {number_of_determinants} {1} \n")
+                file.write(f"determinants {len(determinant_coefficients[0])} {1} \n")
                 for root in range(number_of_roots):
-                    for i in range(number_of_csfs):
-                        file.write(f"      {detcoeff[root][i]:0.6f}")
+                    determinant_coefficients = []
+                    vector = []; temp = 0.0
+                    for i,c in enumerate(ccobj.ci["CI_Coefficients"][root]):
+                        for d in ccobj.ci["CSF_Coefficients"][root]:
+                            temp += c*d
+                        vector.append(temp)
+                    determinant_coefficients.append(vector)
+
+                for i in range(len(determinant_coefficients[0])):
+                    file.write(f" {determinant_coefficients[0][i]:0.6f}")
+                file.write("\n")
                 file.write("end\n")
 
                 # CSF section
@@ -810,7 +820,7 @@ def write_champ_v2_det(ccobj, outputdest=None):
 
                 # CSFMAP section
                 file.write(f"csfmap  \n")
-                file.write(f"{number_of_csfs} {number_of_determinants} {number_of_mappings} \n")
+                file.write(f"{number_of_csfs} {len(determinant_coefficients[0])} {number_of_mappings} \n")
                 for root in range(number_of_roots):
                     for csf in range(number_of_csfs):
                         dets_per_csf = ccobj.ci['Dets_Per_CSF'][root,csf]
