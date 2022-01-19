@@ -12,6 +12,7 @@ import re
 from itertools import accumulate
 
 import numpy
+from numpy import sqrt as SQ
 import periodictable
 
 
@@ -289,3 +290,84 @@ class WidthSplitter:
             while len(elements) and elements[-1] == '':
                 elements.pop()
         return elements
+
+class RealSphericalHarmonics:
+    """Allows conversion between spherical and cartesian basis.
+
+        # Notations
+        # C: Cosine
+        # S: Sine
+        # cartesian ordering: Canonical or alphabetically sorted
+        #   0: 1.0
+        #   1: x, y, z
+        #   2: xx, xy, xz, yy, yz, zz
+        #   3: xxx, xxy, xxz, xyy, xyz, xzz, yyy, yyz, yzz, zzz
+        #   4: xxxx, xxxy, xxxz, xxyy, xxyz, xxzz, xyyy, xyyz, xyzz, xzzz, yyyy, yyyz, yyzz, yzzz, zzzz
+
+        # spherical ordering (l = 0, +1, -1, +2, -2, +3, -3, +4, -4, ...)
+        # C == Cosine term corresponging to positive l (containing x)
+        # S == Sine term corresponging to negative l (containing y)
+        #       lm
+        #   0: C00
+        #   1: C10, C11, S11
+        #   2: C20, C21, S21, C22, S22
+        #   3: C30, C31, S31, C32, S32, C33, S33
+        #   4: C40, C41, S41, C42, S42, C43, S43, C44, S44
+
+    """
+
+    def __init__(self):
+        # l = 0 :: C00(x,y,z) = 1
+        lmax = 3
+        self.Cartesian_to_Spherical = [ [] for i in range(0, lmax) ]
+
+        self.Cartesian_to_Spherical[0] = numpy.array([1.0])
+        self.Cartesian_to_Spherical[1] = numpy.array([[0, 0, 1],[1, 0, 0],[0, 1, 0]])
+        self.Cartesian_to_Spherical[2] = numpy.array([ [-0.5, 0, 0, -0.5, 0, 1],
+                                                    [0, 0, 1, 0, 0, 0],
+                                                    [0, 0, 0, 0, 1, 0],
+                                                    [0.5*SQ(3), 0, 0, -0.5*SQ(3), 0, 0],
+                                                    [0, 1, 0, 0, 0, 0]])
+
+        self.Cartesian_to_Spherical[3] = numpy.array([ [0, 0, -0.3*SQ(5), 0, 0, 0, 0, -0.3*SQ(5), 0, 1],
+                                                    [-0.25*SQ(6), 0, 0, -0.05*SQ(30), 0, 0.2*SQ(30), 0, 0, 0, 0],
+                                                    [0, -0.05*SQ(30), 0, 0, 0, 0, -0.25*SQ(6), 0, 0.2*SQ(30), 0],
+                                                    [0, 0, 0.5*SQ(3), 0, 0, 0, 0, -0.5*SQ(3), 0, 0],
+                                                    [0.25*SQ(10), 0, 0, -0.75*SQ(2), 0, 0, 0, 0, 0, 0],
+                                                    [0, 0.75*SQ(2), 0, 0, 0, 0, -0.25*SQ(10), 0, 0, 0]])
+
+
+    def cartesian2spherical(self, l, arr):
+        """ Converts the cartesian to angular basis for a given angular momentum.
+
+        Inputs:
+            shell angular momentum (l)
+            array of cartesian basis values
+
+        Returns:
+            array of values in spherical basis
+
+        """
+        # Here @ denotes the matrix multiplication in numpy
+        result = self.Cartesian_to_Spherical[l] @ arr
+        return result
+
+    def spherical2cartesian(self, l, arr):
+        """ Converts the angular basis to cartesian for a given angular momentum.
+
+        Inputs:
+            shell angular momentum (l)
+            array of spherical basis values
+
+        Returns:
+            array of values in cartesian basis
+
+        """
+        # Here @ denotes the matrix multiplication in numpy
+
+        inverted = np.linalg.inv(self.Cartesian_to_Spherical[l])
+        result = inverted @ arr
+        return result
+
+
+

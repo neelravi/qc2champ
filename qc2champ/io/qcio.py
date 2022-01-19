@@ -12,7 +12,7 @@ import os
 import sys
 import re
 import numpy as np
-from cclib.parser.utils import PeriodicTable
+from cclib.parser.utils import PeriodicTable, RealSphericalHarmonics
 from tempfile import NamedTemporaryFile
 from urllib.request import urlopen
 from urllib.error import URLError
@@ -627,9 +627,9 @@ def write_trexio(ccobj, outputdest=None):
 
             # Molecular Group
             trexio.write_mo_type(trexio_file, "RASSCF")  # parse this from the file.
-            trexio.write_ao_num(trexio_file, ccobj.mocoeffs[0][0].shape[0])
-            trexio.write_mo_num(trexio_file, ccobj.mocoeffs[0][0].shape[1])
-            trexio.write_mo_coefficient(trexio_file, ccobj.mocoeffs[0][0])
+            trexio.write_ao_num(trexio_file, ccobj.mocoeffs[0].shape[0])
+            trexio.write_mo_num(trexio_file, ccobj.mocoeffs[0].shape[1])
+            trexio.write_mo_coefficient(trexio_file, ccobj.mocoeffs[0])
 
         else:
             raise ValueError
@@ -701,6 +701,10 @@ def write_champ_v2_lcao(ccobj, outputdest=None):
     # If the output filename is mentioned, then write to that file
     # This will write in the old format that CHAMP recognizes.
 
+    RSH = RealSphericalHarmonics()
+
+    print ("Printing the transformation matrix")
+    print (RSH.Cartesian_to_Spherical)
 
     if outputdest is not None:
         if isinstance(outputdest, str):
