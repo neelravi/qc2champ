@@ -319,7 +319,7 @@ class RealSphericalHarmonics:
     def __init__(self):
         # l = 0 :: C00(x,y,z) = 1
         lmax = 3
-        self.Cartesian_to_Spherical = [ [] for i in range(0, lmax) ]
+        self.Cartesian_to_Spherical = [ [] for i in range(0, lmax+1) ]
 
         self.Cartesian_to_Spherical[0] = numpy.array([1.0])
         self.Cartesian_to_Spherical[1] = numpy.array([[0, 0, 1],[1, 0, 0],[0, 1, 0]])

@@ -537,9 +537,9 @@ def ccframe(ccobjs, *args, **kwargs):
 # del find_package
 
 
-def write_champ_v2_sym(ccobj, outputdest=None):
+def write_champ_sym(ccobj, outputdest=None):
     """Writes the parsed geometry, symmetry, determinants, MO coefficients data from the quantum
-    chemistry calculation to old format of champ .sym, .geom, .det, and .lcao file.
+    chemistry calculation to v3 format of champ .sym, .geom, .det, and .lcao file.
 
     Inputs:
         ccobj - Either a job (from ccopen) or a data (from job.parse()) object
@@ -550,7 +550,6 @@ def write_champ_v2_sym(ccobj, outputdest=None):
     """
     # If the output filename is mentioned, then write to that file
     # This will write in the old format that CHAMP recognizes.
-
 
     if outputdest is not None:
         if isinstance(outputdest, str):
@@ -566,10 +565,10 @@ def write_champ_v2_sym(ccobj, outputdest=None):
                     irrep_correspondence[val] = i+1
                     irrep_string += " " + str(i+1) + " " + str(val)
 
-                if all(irreps in ccobj.mosyms for irreps in values):
+                if all(irreps in ccobj.mosyms[0] for irreps in values):
                     file.write(f"{irrep_string} \n")   # This defines the rule
 
-                    for item in ccobj.mosyms:
+                    for item in ccobj.mosyms[0]:
                         for key, val in irrep_correspondence.items():
                             if item == key:
                                 file.write(str(val)+" ")
@@ -584,6 +583,53 @@ def write_champ_v2_sym(ccobj, outputdest=None):
     # If outputdest is None, return a string representation of the output.
     else:
         return None
+
+
+def write_champ_eigenvalues(ccobj, outputdest=None):
+    """Writes the parsed geometry, symmetry, determinants, MO coefficients data from the quantum
+    chemistry calculation to v3 format of champ .sym, .geom, .det, and .lcao file.
+
+    Inputs:
+        ccobj - Either a job (from ccopen) or a data (from job.parse()) object
+        outputdest - A filename or file object for writing. Example, "rhf.sym", "cn3.sym"
+
+    Returns:
+        None as a function value
+    """
+    # If the output filename is mentioned, then write to that file
+    # This will write in the old format that CHAMP recognizes.
+    if outputdest is not None:
+        if isinstance(outputdest, str):
+            ## Write down a symmetry file in champ format
+            with open(outputdest + ".eig", 'w') as file:
+                values, counts = np.unique(ccobj.moenergies, return_counts=True)
+                # point group symmetry independent line printed below
+                file.write("eigenvalues " + " " + str(len(ccobj.moenergies))+"\n")
+
+                for eigenvalue in ccobj.moenergies[0]:
+                    file.write(f"{eigenvalue/27.211386245988:0.8f} ")   # This defines the rule
+                file.write("\n")
+                file.write("end\n")
+            file.close()
+
+        elif isinstance(outputdest, io.IOBase):
+            ## Write down a symmetry file in champ format
+            with open(basename + ".eig", 'w') as file:
+                values, counts = np.unique(ccobj.moenergies, return_counts=True)
+                # point group symmetry independent line printed below
+                file.write("eigenvalues " + " " + str(len(ccobj.moenergies))+"\n")
+
+                for eigenvalue in ccobj.moenergies[0]:
+                    file.write(f"{eigenvalue/27.211386245988:0.8f} ")   # This defines the rule
+                file.write("\n")
+                file.write("end\n")
+            file.close()
+        else:
+            raise ValueError
+    # If outputdest is None, return a string representation of the output.
+    else:
+        return None
+
 
 def write_trexio(ccobj, outputdest=None):
     """Writes the parsed information from the quantum
@@ -641,7 +687,7 @@ def write_trexio(ccobj, outputdest=None):
 
 
 
-def write_champ_v2_geometry(ccobj, outputdest=None):
+def write_champ_geometry(ccobj, outputdest=None):
     """Writes the parsed geometry data from the quantum
     chemistry calculation to new format of champ .geo  file.
 
@@ -673,7 +719,7 @@ def write_champ_v2_geometry(ccobj, outputdest=None):
                 coords = np.array(coords)/0.5291772109 #angstrom_to_bohr conversion
 
                 for element in range(len(ccobj.atomnos)):
-                   file.write("{} {: 0.8f} {: 0.8f} {: 0.8f} \n".format(element_list[element], coords[element][0], coords[element][1], coords[element][2]))
+                   file.write("{} {: 0.12f} {: 0.12f} {: 0.12f} \n".format(element_list[element], coords[element][0], coords[element][1], coords[element][2]))
 
 
 
@@ -705,6 +751,17 @@ def write_champ_v2_lcao(ccobj, outputdest=None):
 
     print ("Printing the transformation matrix")
     print (RSH.Cartesian_to_Spherical)
+
+
+    # Ordering of basis in champ
+    # First S
+    # second one component of D which is S-like
+    # Then P
+    # Then remaining D
+
+    # If cartesian
+    champbasorder = ['S','XX','X','Y','Z','YY','ZZ','XY','XZ','YZ','XXX','YYY','ZZZ','XXY','XXZ','YYX','YYZ','ZZX','ZZY','XYZ']
+    # if spherical (the notation in molcas will be different)
 
     if outputdest is not None:
         if isinstance(outputdest, str):
