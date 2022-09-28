@@ -40,44 +40,58 @@ def write_trexio(ccobj, outputdest=None, motype=None):
         if isinstance(outputdest, str):
             trexio_file = trexio.File(outputdest + ".hdf5", mode='w', back_end=trexio.TREXIO_HDF5)
 
-            ## Metadata
+            ## Metadata -------------------------
             trexio.write_metadata_description(trexio_file, "Trexio file written using qc2trexio package authored by Ravindra Shinde")
 
             if 'package' in ccobj.metadata.keys():
                 trexio.write_metadata_code_num(trexio_file, 1)
                 trexio.write_metadata_code(trexio_file, [ccobj.metadata['package']])
 
-            # if ccobj.metadata['package_version'] is not None:
-            #     print ("package version ", ccobj.metadata['package_version'])
-            #     trexio.write_metadata_package_version(trexio_file, ccobj.metadata['package_version'])
-
             if 'author' in ccobj.metadata.keys():
                 trexio.write_metadata_author_num(trexio_file, 1)
                 trexio.write_metadata_author(trexio_file, [ccobj.metadata['author']])
 
-            #Electron group ## Revisit this group. Don't make it package specific
+            ## Electron group -------------------
+            # ## Revisit this group. Don't make it package specific
             # trexio.write_electron_up_num(trexio_file, int(ccobj.wfn_info['nelec_closed_shell']))
             # trexio.write_electron_dn_num(trexio_file, int(ccobj.wfn_info['nelec_closed_shell']))
 
-            #Nucleus group
+
+            ## Nucleus group ---------------------
+            #  Number of nuclei
             if ccobj.natom is not None:
                 trexio.write_nucleus_num(trexio_file, ccobj.natom)
 
+            #  nucleus coordinates
             if ccobj.atomcoords is not None:
                 trexio.write_nucleus_coord(trexio_file, convertor(ccobj.atomcoords.flatten(), "Angstrom", "bohr"))
 
+            #  nucleus labels
             if ccobj.atomnos is not None:
                 trexio.write_nucleus_charge(trexio_file, ccobj.atomnos)
                 pt = PeriodicTable()
                 element_list = [pt.element[Z] for Z in ccobj.atomnos]
                 trexio.write_nucleus_label(trexio_file, element_list)
 
-
-            # Molecular Group
+            ## Molecular Group -------------------
             trexio.write_mo_type(trexio_file, motype)  # parse this from the file.
-            trexio.write_ao_num(trexio_file, ccobj.mocoeffs[0].shape[0])
-            trexio.write_mo_num(trexio_file, ccobj.mocoeffs[0].shape[1])
-            trexio.write_mo_coefficient(trexio_file, ccobj.mocoeffs[0])
+
+            # number of AO, number of MO
+            if ccobj.mocoeffs[0] is not None:
+                trexio.write_ao_num(trexio_file, ccobj.mocoeffs[0].shape[0])
+                trexio.write_mo_num(trexio_file, ccobj.nmo)
+
+            # MO symmetry irreps
+            if ccobj.mosyms[0] is not None:
+                trexio.write_mo_symmetry(trexio_file, ccobj.mosyms[0])
+
+            # MO eigenvalues
+            # if ccobj.moenergies[0] is not None:
+            #     trexio.write_mo_energy(trexio_file, ccobj.moenergies[0])
+
+            # MO coefficients
+            if ccobj.mocoeffs[0] is not None:
+                trexio.write_mo_coefficient(trexio_file, ccobj.mocoeffs[0])
 
         else:
             raise ValueError
