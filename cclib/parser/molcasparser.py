@@ -1000,127 +1000,127 @@ class Molcas(logfileparser.Logfile):
         #         59 H19   1s     -0.2473
         #         60 H20   1s      0.1835
         #  --
-        if '++    Molecular orbitals:' in line:
+        # if '++    Molecular orbitals:' in line:
 
-            self.skip_lines(inputfile, ['d', 'b'])
-            line = next(inputfile)
+        #     self.skip_lines(inputfile, ['d', 'b'])
+        #     line = next(inputfile)
 
-            # We don't currently support parsing natural orbitals or active space orbitals.
-            # if 'Natural orbitals' not in line and "Pseudonatural" not in line and 'Quasi-canonical orbitals' not in line:
-            if 'Natural orbitals' not in line and "Pseudonatural" not in line:
-                self.skip_line(inputfile, 'b')
+        #     # We don't currently support parsing natural orbitals or active space orbitals.
+        #     # if 'Natural orbitals' not in line and "Pseudonatural" not in line and 'Quasi-canonical orbitals' not in line:
+        #     if 'Natural orbitals' not in line and "Pseudonatural" not in line:
+        #         self.skip_line(inputfile, 'b')
 
-                homos = 0
-                num_irrep =  self.symm_info["symmetry_count"]
-                basis_per_irrep =  self.symm_info["basis_per_irrep"]
-                mocoeffs_per_irrep = [[] for i in range(num_irrep)]
-                moenergies_per_irrep = [[] for i in range(num_irrep)]
-                # aonames_per_irrep = [[] for i in range(num_irrep)]
-                orbital_index_per_irrep = [[] for i in range(num_irrep)]
-                mocoeffs = [[]]
+        #         homos = 0
+        #         num_irrep =  self.symm_info["symmetry_count"]
+        #         basis_per_irrep =  self.symm_info["basis_per_irrep"]
+        #         mocoeffs_per_irrep = [[] for i in range(num_irrep)]
+        #         moenergies_per_irrep = [[] for i in range(num_irrep)]
+        #         # aonames_per_irrep = [[] for i in range(num_irrep)]
+        #         orbital_index_per_irrep = [[] for i in range(num_irrep)]
+        #         mocoeffs = [[]]
 
-                if (num_irrep == 1):
-                    self.mosyms = [item for item in ["a"] for i in range(basis_per_irrep[0])]
-                    self.set_attribute('mosyms', self.mosyms)
-                irreps = OrderedDict(Counter(self.mosyms).items())
-
-
-                line = next(inputfile)
-                tokens = line.split()
-                irrep = 0
-                while not line.strip() == "--":
-                    line = next(inputfile)
-                    tokens = line.split()
-                    if line.strip().startswith('Molecular orbitals for symmetry species'):
-                        irrep += 1
-                        line = next(inputfile)
-
-                    if line.strip().startswith('Orbital'):
-                        orbital_index_per_irrep[irrep].extend(line.split()[1:])
-                        line = next(inputfile)
-
-                    if line.strip().startswith('Energy'):
-                        energies = [utils.convertor(float(x), 'hartree', 'eV') for x in line.split()[1:]]
-                        moenergies_per_irrep[irrep].extend(energies)
-                        line = next(inputfile)
-
-                    if 'Occ. No.' in line:
-                        for i in line.split()[2:]:
-                            if float(i) != 0:
-                                homos += 1
-                        self.skip_line(inputfile, 'b')
-                        line = next(inputfile)
-
-                    tokens = line.split()
-                    # aonames_per_irrep[irrep].append("{atom}_{orbital}".format(atom=tokens[1], orbital=tokens[2]))
-
-                    info = tokens[3:]
-                    j = 0
-                    mocoeffs_per_irrep[irrep].append([ float(x) for x in tokens[3:]])
-                    # print ( [float(x) for x in tokens[3:]])
-                    # self.set_attribute('aonames', aonames)
-                orbitals_per_irrep = [len(i) for i in orbital_index_per_irrep]
-                # print("orbital index per irrep   ", orbital_index_per_irrep)
-                # print("orbitals per irrep   ", orbitals_per_irrep)
-                
-                
-
-                ## Get the intermediate list of indices needed for reshaping the coefficients array
-                intermediate = []
-                for ind, i in enumerate(orbital_index_per_irrep):
-                    print (ind, i[9::10], int(i[-1])%10 )
-                    intermediate.append( [ j for j in i[9::10] ])
-                    intermediate[ind].append(i[-1])
-                    intermediate[ind] = uniquelist(intermediate[ind])
-                    intermediate[ind] = list(map(int, intermediate[ind]))
-
-                # print ("intermediate ", intermediate)
-                ## Convert the parsed mocoeffs data into an ordered arrays.
-
-                ### Step 1: Remove empty lists from the list of lists
-                for irrep in range(num_irrep):
-                    mocoeffs_per_irrep[irrep] = [ele for ele in mocoeffs_per_irrep[irrep] if ele != []]
+        #         if (num_irrep == 1):
+        #             self.mosyms = [item for item in ["a"] for i in range(basis_per_irrep[0])]
+        #             self.set_attribute('mosyms', self.mosyms)
+        #         irreps = OrderedDict(Counter(self.mosyms).items())
 
 
-                ### Step 2: Get the basis set information
-                irreps = OrderedDict(Counter(self.mosyms).items())
-                basis_per_irrep = []
-                for _, bas in irreps.items():
-                    basis_per_irrep.append(bas)
+        #         line = next(inputfile)
+        #         tokens = line.split()
+        #         irrep = 0
+        #         while not line.strip() == "--":
+        #             line = next(inputfile)
+        #             tokens = line.split()
+        #             if line.strip().startswith('Molecular orbitals for symmetry species'):
+        #                 irrep += 1
+        #                 line = next(inputfile)
 
-                # print ("basis_per_irrep ", basis_per_irrep)
+        #             if line.strip().startswith('Orbital'):
+        #                 orbital_index_per_irrep[irrep].extend(line.split()[1:])
+        #                 line = next(inputfile)
 
-                # Number of splitted blocks of 10 orbitals per irrep
-                blocks = []
-                for blk in intermediate:
-                    blocks.append(len(blk))
+        #             if line.strip().startswith('Energy'):
+        #                 energies = [utils.convertor(float(x), 'hartree', 'eV') for x in line.split()[1:]]
+        #                 moenergies_per_irrep[irrep].extend(energies)
+        #                 line = next(inputfile)
 
-                # print ("blocks ", blocks)
+        #             if 'Occ. No.' in line:
+        #                 for i in line.split()[2:]:
+        #                     if float(i) != 0:
+        #                         homos += 1
+        #                 self.skip_line(inputfile, 'b')
+        #                 line = next(inputfile)
 
-                # print ("mocoeffs_per_irrep ", mocoeffs_per_irrep)
+        #             tokens = line.split()
+        #             # aonames_per_irrep[irrep].append("{atom}_{orbital}".format(atom=tokens[1], orbital=tokens[2]))
+
+        #             info = tokens[3:]
+        #             j = 0
+        #             mocoeffs_per_irrep[irrep].append([ float(x) for x in tokens[3:]])
+        #             # print ( [float(x) for x in tokens[3:]])
+        #             # self.set_attribute('aonames', aonames)
+        #         orbitals_per_irrep = [len(i) for i in orbital_index_per_irrep]
+        #         # print("orbital index per irrep   ", orbital_index_per_irrep)
+        #         # print("orbitals per irrep   ", orbitals_per_irrep)
 
 
-                npmocoeff = numpy.zeros([num_irrep, max(basis_per_irrep), max(orbitals_per_irrep)], dtype=float)
 
-                numpy.set_printoptions(threshold=sys.maxsize)
+        #         ## Get the intermediate list of indices needed for reshaping the coefficients array
+        #         intermediate = []
+        #         for ind, i in enumerate(orbital_index_per_irrep):
+        #             print (ind, i[9::10], int(i[-1])%10 )
+        #             intermediate.append( [ j for j in i[9::10] ])
+        #             intermediate[ind].append(i[-1])
+        #             intermediate[ind] = uniquelist(intermediate[ind])
+        #             intermediate[ind] = list(map(int, intermediate[ind]))
 
-                if num_irrep == 1:
-                    for irrep in range(num_irrep):                          # Run loop over all irreps
-                        for ind in range(blocks[irrep]):                    # Run loop over all blocks of 10 orbitals
-                            blockoften =  intermediate[0][ind] - 10*ind     # Get the block number
-                            for i in range(basis_per_irrep[irrep]):         # Run loop over all basis functions
-                                for j in range(blockoften):                 # Run loop over all orbitals in block
-                                    npmocoeff[irrep, i, 10*ind + j] = mocoeffs_per_irrep[0][basis_per_irrep[irrep]*ind+i][j]
-                else:
-                    for irrep in range(num_irrep):                          # Run loop over all irreps
-                        for ind in range(blocks[irrep]):                    # Run loop over all blocks of 10 orbitals
-                            blockoften =  intermediate[0][ind] - 10*ind     # Get the block number
-                            for i in range(basis_per_irrep[irrep]):         # Run loop over all basis functions
-                                for j in range(blockoften):                 # Run loop over all orbitals in block
-                                    npmocoeff[irrep, i, 10*ind + j] = mocoeffs_per_irrep[0][basis_per_irrep[irrep]*ind+i][j]
+        #         # print ("intermediate ", intermediate)
+        #         ## Convert the parsed mocoeffs data into an ordered arrays.
 
-                if num_irrep == 1:
-                    self.append_attribute('mocoeffs', (numpy.transpose(npmocoeff[0])).tolist())
+        #         ### Step 1: Remove empty lists from the list of lists
+        #         for irrep in range(num_irrep):
+        #             mocoeffs_per_irrep[irrep] = [ele for ele in mocoeffs_per_irrep[irrep] if ele != []]
+
+
+        #         ### Step 2: Get the basis set information
+        #         irreps = OrderedDict(Counter(self.mosyms).items())
+        #         basis_per_irrep = []
+        #         for _, bas in irreps.items():
+        #             basis_per_irrep.append(bas)
+
+        #         # print ("basis_per_irrep ", basis_per_irrep)
+
+        #         # Number of splitted blocks of 10 orbitals per irrep
+        #         blocks = []
+        #         for blk in intermediate:
+        #             blocks.append(len(blk))
+
+        #         # print ("blocks ", blocks)
+
+        #         # print ("mocoeffs_per_irrep ", mocoeffs_per_irrep)
+
+
+        #         npmocoeff = numpy.zeros([num_irrep, max(basis_per_irrep), max(orbitals_per_irrep)], dtype=float)
+
+        #         numpy.set_printoptions(threshold=sys.maxsize)
+
+        #         if num_irrep == 1:
+        #             for irrep in range(num_irrep):                          # Run loop over all irreps
+        #                 for ind in range(blocks[irrep]):                    # Run loop over all blocks of 10 orbitals
+        #                     blockoften =  intermediate[0][ind] - 10*ind     # Get the block number
+        #                     for i in range(basis_per_irrep[irrep]):         # Run loop over all basis functions
+        #                         for j in range(blockoften):                 # Run loop over all orbitals in block
+        #                             npmocoeff[irrep, i, 10*ind + j] = mocoeffs_per_irrep[0][basis_per_irrep[irrep]*ind+i][j]
+        #         else:
+        #             for irrep in range(num_irrep):                          # Run loop over all irreps
+        #                 for ind in range(blocks[irrep]):                    # Run loop over all blocks of 10 orbitals
+        #                     blockoften =  intermediate[0][ind] - 10*ind     # Get the block number
+        #                     for i in range(basis_per_irrep[irrep]):         # Run loop over all basis functions
+        #                         for j in range(blockoften):                 # Run loop over all orbitals in block
+        #                             npmocoeff[irrep, i, 10*ind + j] = mocoeffs_per_irrep[0][basis_per_irrep[irrep]*ind+i][j]
+
+        #         if num_irrep == 1:
+        #             self.append_attribute('mocoeffs', (numpy.transpose(npmocoeff[0])).tolist())
                 # print ("self mocoeffs 3rd orbs ", self.mocoeffs[0][2])
 
                 # i = 0; ik=0
@@ -1537,11 +1537,11 @@ class Molcas(logfileparser.Logfile):
             self.ci["CI_Energy"] = ci_energy
 
             # Replace the occupation strings with champ formatted numbers
-            print ("ci occupations original ", ci_occupations[0].shape)
-            ci_occupations = numpy.vectorize(utils.molcas_occup_strings_to_numbers)(ci_occupations)
+            # print ("ci occupations original ", ci_occupations[0].shape)
+            # ci_occupations = numpy.vectorize(utils.molcas_occup_strings_to_numbers)(ci_occupations)
             #
             self.ci["Dets_Per_CSF"] = dets_per_csf
-            self.ci["CI_Occupations"] = ci_occupations
+            # self.ci["CI_Occupations"] = ci_occupations
             self.ci["CI_Coefficients"] = ci_coeff
             self.ci["CSF_Occupations"] = csf_occupations
             self.ci["CSF_Coefficients"] = csf_coeff

@@ -5,11 +5,7 @@ import numpy as np
 import sys
 import os
 
-for filename in ["sample_h2_rasscf.out"]:
-    basename = (filename.split(".", 1)[0])
-    data = cclib.io.ccread(filename)
-    # qc2champ.io.ccwrite(data, outputtype="xyz", outputdest="output.xyz")
-    # qc2champ.io.write_champ_v2_geometry(data, outputdest="CN3_" + basename)
+
 
 def test_cclib():
 	assert data.natom == 2
@@ -25,5 +21,13 @@ def test_qc2champ():
 	assert data.metadata['package_version'] == '8.4'
 
 
-test_cclib()
-test_qc2champ()
+for filename in ["sample_h2_rasscf.out"]:
+	basename = (filename.split(".", 1)[0])
+	data = cclib.io.ccread(filename)
+	test_cclib()
+	test_qc2champ()
+	# qc2champ.io.ccwrite(data, outputtype="xyz", outputdest="output.xyz")
+	# qc2champ.io.write_champ_v2_geometry(data, outputdest="CN3_" + basename)
+	# qc2champ.io.write_champ_v2_sym(data, outputdest="CN3_" + basename)
+	# qc2champ.io.write_trexio(data, outputdest="CN3_" + basename)
+	# qc2champ.io.write_champ_v2_det(data, outputdest="CN3_" + basename)
