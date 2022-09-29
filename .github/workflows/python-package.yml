@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.6", "3.7", "3.8", "3.9"]
+        python-version: ["3.6", "3.7", "3.8"]
 
     steps:
     - uses: actions/checkout@v2
@@ -32,7 +32,6 @@ jobs:
         python -m pip install --upgrade cython
         python -m pip install --upgrade trexio
         python -m pip install --upgrade trexio_tools
-        sudo apt-get install -y gcc
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
     - name: Automatic Testing with pytest
