@@ -30,11 +30,11 @@ class Molcas(logfileparser.Logfile):
 
     def __str__(self):
         """Return a string repeesentation of the object."""
-        return "Molcas log file %s" % (self.filename)
+        return f"Molcas log file {self.filename}"
 
     def __repr__(self):
         """Return a representation of the object."""
-        return 'Molcas("%s")' % (self.filename)
+        return f'Molcas("{self.filename}")'
 
     def normalisesym(self, label):
         """Normalise the symmetries used by Molcas.
@@ -55,21 +55,11 @@ class Molcas(logfileparser.Logfile):
             # distinction between development and release builds in their
             # version cycle.
             if "tag" in self.metadata and "revision" in self.metadata:
-                self.metadata["package_version"] = "{}+{}.{}".format(
-                    self.metadata["package_version"],
-                    self.metadata["tag"],
-                    self.metadata["revision"]
-                )
+                self.metadata["package_version"] = f"{self.metadata['package_version']}+{self.metadata['tag']}.{self.metadata['revision']}"
             elif "tag" in self.metadata:
-                self.metadata["package_version"] = "{}+{}".format(
-                    self.metadata["package_version"],
-                    self.metadata["tag"]
-                )
+                self.metadata["package_version"] = f"{self.metadata['package_version']}+{self.metadata['tag']}"
             elif "revision" in self.metadata:
-                self.metadata["package_version"] = "{}+{}".format(
-                    self.metadata["package_version"],
-                    self.metadata["revision"]
-                )
+                self.metadata["package_version"] = f"{self.metadata['package_version']}+{self.metadata['revision']}"
 
     def before_parsing(self):
         # Compile the regex for extracting the element symbol from the
@@ -94,6 +84,7 @@ class Molcas(logfileparser.Logfile):
         if self.gateway_module_count > 1:
             return
 
+        self.metadata["author"] = "Ravindra Shinde"
         # Extract the version number and optionally the Git tag and hash.
 
         if "Version" in line:
@@ -111,7 +102,7 @@ class Molcas(logfileparser.Logfile):
             if match:
                 self.metadata["revision"] = match.groups()[0]
         if "is licensed to" in line:
-            self.metadata["author"] = " ".join(line.split()[-2:])
+            self.metadata["owner"] = " ".join(line.split()[-2:])
 
         ## This section is present when executing &GATEWAY.
         # ++    Molecular structure info:
@@ -685,10 +676,7 @@ class Molcas(logfileparser.Logfile):
                 self.atomcoords.append(atomcoords)
             else:
                 self.logger.warning(
-                        "Parsed coordinates not consistent with previous, skipping. "
-                        "This could be due to symmetry being turned on during the job. "
-                        "Length was %i, now found %i. New coordinates: %s"
-                        % (len(self.atomcoords[-1]), len(atomcoords), str(atomcoords)))
+                        f"Parsed coordinates not consistent with previous, skipping. This could be due to symmetry being turned on during the job. Length was {len(self.atomcoords[-1])}, now found {len(atomcoords)}. New coordinates: {str(atomcoords)}")
 
         #  **********************************************************************************************************************
         #  *                                    Energy Statistics for Geometry Optimization                                     *
@@ -740,10 +728,7 @@ class Molcas(logfileparser.Logfile):
                 self.atomcoords.append(atomcoords)
             else:
                 self.logger.error(
-                        'Number of atoms (%d) in parsed atom coordinates '
-                        'is smaller than previously (%d), possibly due to '
-                        'symmetry. Ignoring these coordinates.'
-                        % (len(atomcoords), self.natom))
+                        f'Number of atoms ({len(atomcoords)}) in parsed atom coordinates is smaller than previously ({int(self.natom)}), possibly due to symmetry. Ignoring these coordinates.')
 
         ## Parsing Molecular Gradients attributes in this section.
         # ()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()
@@ -1000,68 +985,68 @@ class Molcas(logfileparser.Logfile):
         #         59 H19   1s     -0.2473
         #         60 H20   1s      0.1835
         #  --
-        # if '++    Molecular orbitals:' in line:
+        if '++    Molecular orbitals:' in line:
 
-        #     self.skip_lines(inputfile, ['d', 'b'])
-        #     line = next(inputfile)
+            self.skip_lines(inputfile, ['d', 'b'])
+            line = next(inputfile)
 
-        #     # We don't currently support parsing natural orbitals or active space orbitals.
-        #     # if 'Natural orbitals' not in line and "Pseudonatural" not in line and 'Quasi-canonical orbitals' not in line:
-        #     if 'Natural orbitals' not in line and "Pseudonatural" not in line:
-        #         self.skip_line(inputfile, 'b')
+            # We don't currently support parsing natural orbitals or active space orbitals.
+            # if 'Natural orbitals' not in line and "Pseudonatural" not in line and 'Quasi-canonical orbitals' not in line:
+            if 'Natural orbitals' not in line and "Pseudonatural" not in line:
+                self.skip_line(inputfile, 'b')
 
-        #         homos = 0
-        #         num_irrep =  self.symm_info["symmetry_count"]
-        #         basis_per_irrep =  self.symm_info["basis_per_irrep"]
-        #         mocoeffs_per_irrep = [[] for i in range(num_irrep)]
-        #         moenergies_per_irrep = [[] for i in range(num_irrep)]
-        #         # aonames_per_irrep = [[] for i in range(num_irrep)]
-        #         orbital_index_per_irrep = [[] for i in range(num_irrep)]
-        #         mocoeffs = [[]]
+                homos = 0
+                num_irrep =  self.symm_info["symmetry_count"]
+                basis_per_irrep =  self.symm_info["basis_per_irrep"]
+                mocoeffs_per_irrep = [[] for i in range(num_irrep)]
+                moenergies_per_irrep = [[] for i in range(num_irrep)]
+                # aonames_per_irrep = [[] for i in range(num_irrep)]
+                orbital_index_per_irrep = [[] for i in range(num_irrep)]
+                mocoeffs = [[]]
 
-        #         if (num_irrep == 1):
-        #             self.mosyms = [item for item in ["a"] for i in range(basis_per_irrep[0])]
-        #             self.set_attribute('mosyms', self.mosyms)
-        #         irreps = OrderedDict(Counter(self.mosyms).items())
+                if (num_irrep == 1):
+                    self.mosyms = [item for item in ["a"] for i in range(basis_per_irrep[0])]
+                    self.set_attribute('mosyms', self.mosyms)
+                irreps = OrderedDict(Counter(self.mosyms).items())
 
 
-        #         line = next(inputfile)
-        #         tokens = line.split()
-        #         irrep = 0
-        #         while not line.strip() == "--":
-        #             line = next(inputfile)
-        #             tokens = line.split()
-        #             if line.strip().startswith('Molecular orbitals for symmetry species'):
-        #                 irrep += 1
-        #                 line = next(inputfile)
+                line = next(inputfile)
+                tokens = line.split()
+                irrep = 0
+                while not line.strip() == "--":
+                    line = next(inputfile)
+                    tokens = line.split()
+                    if line.strip().startswith('Molecular orbitals for symmetry species'):
+                        irrep += 1
+                        line = next(inputfile)
 
-        #             if line.strip().startswith('Orbital'):
-        #                 orbital_index_per_irrep[irrep].extend(line.split()[1:])
-        #                 line = next(inputfile)
+                    if line.strip().startswith('Orbital'):
+                        orbital_index_per_irrep[irrep].extend(line.split()[1:])
+                        line = next(inputfile)
 
-        #             if line.strip().startswith('Energy'):
-        #                 energies = [utils.convertor(float(x), 'hartree', 'eV') for x in line.split()[1:]]
-        #                 moenergies_per_irrep[irrep].extend(energies)
-        #                 line = next(inputfile)
+                    if line.strip().startswith('Energy'):
+                        energies = [utils.convertor(float(x), 'hartree', 'eV') for x in line.split()[1:]]
+                        moenergies_per_irrep[irrep].extend(energies)
+                        line = next(inputfile)
 
-        #             if 'Occ. No.' in line:
-        #                 for i in line.split()[2:]:
-        #                     if float(i) != 0:
-        #                         homos += 1
-        #                 self.skip_line(inputfile, 'b')
-        #                 line = next(inputfile)
+                    if 'Occ. No.' in line:
+                        for i in line.split()[2:]:
+                            if float(i) != 0:
+                                homos += 1
+                        self.skip_line(inputfile, 'b')
+                        line = next(inputfile)
 
-        #             tokens = line.split()
-        #             # aonames_per_irrep[irrep].append("{atom}_{orbital}".format(atom=tokens[1], orbital=tokens[2]))
+                    tokens = line.split()
+                    # aonames_per_irrep[irrep].append("{atom}_{orbital}".format(atom=tokens[1], orbital=tokens[2]))
 
-        #             info = tokens[3:]
-        #             j = 0
-        #             mocoeffs_per_irrep[irrep].append([ float(x) for x in tokens[3:]])
-        #             # print ( [float(x) for x in tokens[3:]])
-        #             # self.set_attribute('aonames', aonames)
-        #         orbitals_per_irrep = [len(i) for i in orbital_index_per_irrep]
-        #         # print("orbital index per irrep   ", orbital_index_per_irrep)
-        #         # print("orbitals per irrep   ", orbitals_per_irrep)
+                    info = tokens[3:]
+                    j = 0
+                    mocoeffs_per_irrep[irrep].append([ float(x) for x in tokens[3:]])
+                    print ( "some float ", [float(x) for x in tokens[3:]])
+                    # self.set_attribute('aonames', aonames)
+                orbitals_per_irrep = [len(i) for i in orbital_index_per_irrep]
+                print("orbital index per irrep   ", orbital_index_per_irrep)
+                print("orbitals per irrep   ", orbitals_per_irrep)
 
 
 

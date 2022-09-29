@@ -45,18 +45,6 @@ from cclib.io import wfxwriter
 from cclib.io import xyzreader
 from cclib.io import xyzwriter
 
-try:
-    import trexio
-except:
-    print("Error: The TREXIO Python library is not installed")
-    sys.exit(1)
-
-try:
-    from resultsFile import getFile, a0
-except:
-    print("Error: The resultsFile Python library is not installed")
-    sys.exit(1)
-
 
 _has_cclib2openbabel = find_package("openbabel")
 if _has_cclib2openbabel:
@@ -631,62 +619,6 @@ def write_champ_eigenvalues(ccobj, outputdest=None):
         return None
 
 
-def write_trexio(ccobj, outputdest=None):
-    """Writes the parsed information from the quantum
-    chemistry calculation to trexio hdf5 file.
-
-    Inputs:
-        ccobj - Either a job (from ccopen) or a data (from job.parse()) object
-        outputdest - A filename or file object for writing. Example, "rhf.geo", "cn3.geo"
-
-    Returns:
-        None as a function value
-    """
-
-    # If the output filename is mentioned, then write to that file
-    # This will write in the new format that CHAMP recognizes.
-
-    ## trexio part
-    if outputdest is not None:
-        if isinstance(outputdest, str):
-            trexio_file = trexio.File(outputdest + ".hdf5", mode='w', back_end=trexio.TREXIO_HDF5)
-
-            ## Metadata
-            trexio.write_metadata_code_num(trexio_file, 1)
-            trexio.write_metadata_code(trexio_file, [ccobj.metadata['package']])
-            trexio.write_metadata_author_num(trexio_file, 1)
-            trexio.write_metadata_author(trexio_file, [ccobj.metadata['author']])
-            trexio.write_metadata_description(trexio_file, "File Conversion using qc2trexio package written by Ravindra Shinde")
-
-            #Electron group ## Revisit this group. Don't make it package specific
-            # trexio.write_electron_up_num(trexio_file, int(ccobj.wfn_info['nelec_closed_shell']))
-            # trexio.write_electron_dn_num(trexio_file, int(ccobj.wfn_info['nelec_closed_shell']))
-
-            #Nucleus group
-            trexio.write_nucleus_num(trexio_file, ccobj.natom)
-            trexio.write_nucleus_coord(trexio_file, convertor(ccobj.atomcoords.flatten(), "Angstrom", "bohr"))
-            trexio.write_nucleus_charge(trexio_file, ccobj.atomnos)
-
-            pt = PeriodicTable()
-            element_list = [pt.element[Z] for Z in ccobj.atomnos]
-            trexio.write_nucleus_label(trexio_file, element_list)
-
-            # Molecular Group
-            trexio.write_mo_type(trexio_file, "RASSCF")  # parse this from the file.
-            trexio.write_ao_num(trexio_file, ccobj.mocoeffs[0].shape[0])
-            trexio.write_mo_num(trexio_file, ccobj.mocoeffs[0].shape[1])
-            trexio.write_mo_coefficient(trexio_file, ccobj.mocoeffs[0])
-
-        else:
-            raise ValueError
-    # If outputdest is None, return a string representation of the output.
-    else:
-        return None
-
-
-
-
-
 def write_champ_geometry(ccobj, outputdest=None):
     """Writes the parsed geometry data from the quantum
     chemistry calculation to new format of champ .geo  file.
@@ -793,13 +725,14 @@ def occup_strings_to_numbers(occup):
     """
 
     occ_string = ""
-    # print ("original string ", occup)
+    print ("original string ", occup)
     for key, val in enumerate(occup):
         print ("original chars in string ", key, val)
         #occ_string += str(i) + " "
         occup_alpha = occup.replace('a', '1').replace('2', '1')
         occup_beta =  occup.replace('b', '1').replace('2', '1')
-    # print ("occup alpha ", occup_alpha)
+    print ("occup alpha ", occup_alpha)
+    print ("occup beta", occup_beta)
     return occ_string
 
 
